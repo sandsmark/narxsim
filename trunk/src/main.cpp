@@ -68,6 +68,9 @@ int main(int argc, char *argv[])
 	QObject::connect ( w.ui.Button_tab21, SIGNAL( clicked() ), &w, SLOT( Button_21() ) );
 	QObject::connect ( w.ui.Button_tab23, SIGNAL( clicked() ), &w, SLOT( Button_23() ) );
 	QObject::connect ( w.ui.Button_tab34, SIGNAL( clicked() ), &w, SLOT( Button_34() ) );
+	QObject::connect ( w.ui.Button_tab32, SIGNAL( clicked() ), &w, SLOT( Button_32() ) );
+	QObject::connect ( w.ui.Button_tab43, SIGNAL( clicked() ), &w, SLOT( Button_43() ) );
+	QObject::connect ( w.ui.Button_tab45, SIGNAL( clicked() ), &w, SLOT( Button_45() ) );
 	QObject::connect ( w.ui.Button_start_training, SIGNAL( clicked() ), &w, SLOT( Button_start_train() ) );
 
 
@@ -77,6 +80,7 @@ int main(int argc, char *argv[])
 	w.ui.tabWidget->setTabEnabled(1, false);
 	w.ui.tabWidget->setTabEnabled(2, false);
 	w.ui.tabWidget->setTabEnabled(3, false);
+	w.ui.tabWidget->setTabEnabled(4, false);
 	
 	return a.exec();
 }

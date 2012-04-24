@@ -48,8 +48,8 @@ NARX::NARX(void)
 	//printf("%d\n", index);
 	output_unit = new OutputUnit();
 	//output_unit->setTarget(series[series_index+1]);
-	output_unit->set_activation_func(Activation_functions::sigmoid);
-	output_unit->set_activation_func_derv(Activation_functions::sigmoid_derv);
+	output_unit->set_activation_func(Activation_functions::identity);
+	output_unit->set_activation_func_derv(Activation_functions::identity_derv);
 	
 	for(int i=0;i<H;i++)
 		output_unit->add_input_unit(hunits[i]);

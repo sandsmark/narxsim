@@ -3,7 +3,7 @@
 #include "stdlib.h"
 
 
-double Unit::alfa = 0.1;
+double Unit::alfa = 0.2;
 
 Unit::Unit(void)
 {

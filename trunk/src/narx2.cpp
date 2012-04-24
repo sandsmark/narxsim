@@ -28,6 +28,7 @@ NARX2::NARX2(QWidget *parent, Qt::WFlags flags)
 	ui.Combo_base_function->addItem( "exp");
 	ui.Combo_base_function->addItem( "sqr");
 	ui.Combo_base_function->addItem( "hip");
+	ui.Combo_base_function->addItem( "lin");
 
 }
 
@@ -121,11 +122,15 @@ void NARX2::Button_12()
 		case 4:
 			val = 1 / cur;
 			break;
+		case 5:
+			val = cur;
+			break;
 		default:
 			val = 1.0;
 		};
 
-		val += val * ((rand() % (2*series_noise) - series_noise)) / 100 ;
+		if(series_noise)
+			val += val * ((rand() % (2*series_noise) - series_noise)) / 100 ;
 
 		QTableWidgetItem *newItem2 = new QTableWidgetItem(tr("%1").arg(val));
 		
@@ -148,19 +153,7 @@ exit1:
 	series_generated = 1;
     //ui.tabWidget->setTabEnabled(0, false);
 
-	//initialize NARX:
-
-
-	/* main NARX code */
-	if(!mynarx)
-	{
-		mynarx = new NARX();
-		QObject::connect ( mynarx, SIGNAL( training_epoch_finished() ), this, SLOT( train_progress_inc() ) );
-		QObject::connect ( mynarx, SIGNAL( log() ), this, SLOT( log() ), Qt::BlockingQueuedConnection );
-	}
-
 	
-	/* end of main NARX code */
 
 }
 
@@ -175,10 +168,42 @@ void NARX2::Button_23()
 	ui.tabWidget->setTabEnabled(2, true);
 	ui.tabWidget->setCurrentIndex(2);
 }
+
+void NARX2::Button_32()
+{
+	ui.tabWidget->setTabEnabled(1, true);
+	ui.tabWidget->setCurrentIndex(1);
+}
+
 void NARX2::Button_34()
 {
 	ui.tabWidget->setTabEnabled(3, true);
 	ui.tabWidget->setCurrentIndex(3);
 
+	//
+	Unit::alfa = ui.lineedit_learningrate->text().toFloat();
+
+	//initialize NARX:
+
+
+	/* main NARX code */
+	if(!mynarx)
+	{
+		mynarx = new NARX();
+		QObject::connect ( mynarx, SIGNAL( training_epoch_finished() ), this, SLOT( train_progress_inc() ) );
+		QObject::connect ( mynarx, SIGNAL( log() ), this, SLOT( log() ), Qt::BlockingQueuedConnection );
+	}
+
 	
+	/* end of main NARX code */
+}
+void NARX2::Button_43()
+{
+	ui.tabWidget->setTabEnabled(2, true);
+	ui.tabWidget->setCurrentIndex(2);
+}
+void NARX2::Button_45()
+{
+	ui.tabWidget->setTabEnabled(4, true);
+	ui.tabWidget->setCurrentIndex(4);
 }

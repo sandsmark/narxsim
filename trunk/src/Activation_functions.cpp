@@ -21,3 +21,13 @@ double Activation_functions::linear(double arg)
 {
 	return arg>=1.0;
 }
+
+double Activation_functions::identity(double arg)
+{
+	return arg;
+}
+
+double Activation_functions::identity_derv(double arg)
+{
+	return 1;
+}
