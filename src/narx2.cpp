@@ -18,6 +18,10 @@ extern void train_progress_inc();
 
 extern NARX *mynarx;
 
+int narx_stage1_5 = 0;
+//initialize NARX:
+ARCH arch = MLP;
+
 NARX2::NARX2(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
 {
@@ -177,25 +181,52 @@ void NARX2::Button_32()
 
 void NARX2::Button_34()
 {
-	ui.tabWidget->setTabEnabled(3, true);
-	ui.tabWidget->setCurrentIndex(3);
+	
 
 	//
 	Unit::alfa = ui.lineedit_learningrate->text().toFloat();
-
-	//initialize NARX:
-
-
-	/* main NARX code */
-	if(!mynarx)
-	{
-		mynarx = new NARX();
-		QObject::connect ( mynarx, SIGNAL( training_epoch_finished() ), this, SLOT( train_progress_inc() ) );
-		QObject::connect ( mynarx, SIGNAL( log() ), this, SLOT( log() ), Qt::BlockingQueuedConnection );
-	}
+	epochs = ui.lineedit_epochs->text().toFloat();
+	ui.progressbar_train->setMaximum(epochs);
 
 	
+
+	/* main NARX code */
+	if(!narx_stage1_5)
+	{
+		
+		
+		if (!ui.check_del_targets->isChecked() && !ui.check_del_outputs->isChecked() && !ui.check_exogenous->isChecked())
+		{
+			QMessageBox::information( this, "NARX", "Selected architecture: MLP" );
+			arch = MLP;
+		}
+		if (ui.check_del_targets->isChecked() && !ui.check_del_outputs->isChecked() && !ui.check_exogenous->isChecked())
+		{
+			QMessageBox::information( this, "NARX", "Selected architecture: NAR-D" );
+			arch = NAR_D;
+		}
+
+		narx_stage1_5 = 1;
+		
+	
+	} 
 	/* end of main NARX code */
+
+	if (!ui.check_del_targets->isChecked())
+		ui.spinbox_dregressor->setEnabled(false);
+	if (!ui.check_del_outputs->isChecked())
+		ui.spinbox_yregressor->setEnabled(false);
+	if (!ui.check_exogenous->isChecked())
+		ui.spinbox_xregressor->setEnabled(false);
+
+	ui.tabWidget->setTabEnabled(3, true);
+	ui.tabWidget->setCurrentIndex(3);
+	ui.check_del_targets->setEnabled(false);
+	ui.lineedit_epochs->setEnabled(false);
+	ui.lineedit_learningrate->setEnabled(false);
+	ui.check_exogenous->setEnabled(false);
+	ui.check_del_outputs->setEnabled(false);
+	ui.spinbox_hidden_units->setEnabled(false);
 }
 void NARX2::Button_43()
 {
@@ -204,6 +235,11 @@ void NARX2::Button_43()
 }
 void NARX2::Button_45()
 {
+	mynarx = new NARX(arch, ui.spinbox_hidden_units->value(), 0, ui.spinbox_dregressor->value());
+
+	QObject::connect ( mynarx, SIGNAL( training_epoch_finished() ), this, SLOT( train_progress_inc() ) );
+	QObject::connect ( mynarx, SIGNAL( log() ), this, SLOT( log() ), Qt::BlockingQueuedConnection );
+
 	ui.tabWidget->setTabEnabled(4, true);
 	ui.tabWidget->setCurrentIndex(4);
 }

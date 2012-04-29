@@ -3,6 +3,7 @@
 #include "Unit.h"
 #include "InputUnit.h"
 #include "OutputUnit.h"
+#include "narx_util.h"
 
 class NARX : public QThread
 {
@@ -14,6 +15,8 @@ protected:
 	int a;
 	int b;
 
+	ARCH arch;
+
 	Unit **hunits;
 	OutputUnit *output_unit;
 	InputUnit **inputs;
@@ -24,10 +27,12 @@ protected:
 	void run();
 
 public:
-	NARX(void);
+	NARX(ARCH arch, int H = 1, int a = 0, int b = 0);
 	~NARX(void);
 
 	void train(int epochs);
+
+	ARCH getArch();
 
 signals:
 	void training_epoch_finished();
