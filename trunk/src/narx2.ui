@@ -38,7 +38,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>3</number>
     </property>
     <property name="documentMode">
      <bool>false</bool>
@@ -433,7 +433,7 @@
       <property name="lineWidth">
        <number>3</number>
       </property>
-      <widget class="QCheckBox" name="checkBox">
+      <widget class="QCheckBox" name="check_del_targets">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -481,7 +481,7 @@
       <property name="lineWidth">
        <number>3</number>
       </property>
-      <widget class="QCheckBox" name="checkBox_2">
+      <widget class="QCheckBox" name="check_exogenous">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -513,7 +513,7 @@
       <property name="lineWidth">
        <number>3</number>
       </property>
-      <widget class="QCheckBox" name="checkBox_3">
+      <widget class="QCheckBox" name="check_del_outputs">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -748,28 +748,54 @@
        <enum>Qt::Vertical</enum>
       </property>
      </widget>
+     <widget class="QLabel" name="label_12">
+      <property name="geometry">
+       <rect>
+        <x>250</x>
+        <y>20</y>
+        <width>91</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Number of epochs</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineedit_epochs">
+      <property name="geometry">
+       <rect>
+        <x>350</x>
+        <y>20</y>
+        <width>113</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>100</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
-      <string>Regressor setup</string>
+      <string>Regressors setup</string>
      </attribute>
      <widget class="QLabel" name="label_6">
       <property name="geometry">
        <rect>
         <x>20</x>
         <y>20</y>
-        <width>161</width>
+        <width>171</width>
         <height>21</height>
        </rect>
       </property>
       <property name="text">
-       <string>Input regressor size (at least 1)</string>
+       <string>Targets regressor size (at least 1)</string>
       </property>
      </widget>
-     <widget class="QSpinBox" name="spinBox_2">
+     <widget class="QSpinBox" name="spinbox_dregressor">
       <property name="geometry">
        <rect>
-        <x>180</x>
+        <x>200</x>
         <y>20</y>
         <width>71</width>
         <height>22</height>
@@ -806,6 +832,52 @@
       </property>
       <property name="text">
        <string>Back</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_13">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>60</y>
+        <width>171</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Outputs regressor size (feedback)</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="spinbox_yregressor">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>60</y>
+        <width>71</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_14">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>100</y>
+        <width>171</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Inputs regressor size (exogenous)</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="spinbox_xregressor">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>100</y>
+        <width>71</width>
+        <height>22</height>
+       </rect>
       </property>
      </widget>
     </widget>

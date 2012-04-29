@@ -19,13 +19,13 @@ extern int epochs;
 QString narx_log_str;
 
 
-NARX::NARX(void)
+NARX::NARX(ARCH arch, int H, int a, int b)
 {
 
-	H = 1;
-	a = 0;
-	b = 0;
-	
+	this->H = H;
+	this->a = a;
+	this->b = b;
+	this->arch = arch;
 
 	hunits = new Unit*[H];
 	inputs = new InputUnit*[a+1];
@@ -59,6 +59,11 @@ NARX::NARX(void)
 		
 }
 
+ARCH NARX::getArch()
+{
+	return arch;
+}
+
 void NARX::train(int epochs)
 {
 	for(int i=0;i<epochs - 1;i++) {
@@ -82,7 +87,7 @@ void NARX::trainEpoch(bool logging)
 
 	output_unit->setTarget(series[series_index + 1]);
 
-	QString str = QString("input target: %1, output narx: %2").arg(series[series_index+1]).arg(output_unit->get_output());
+	QString str = QString("input target:index %1 : %2, output narx: %3").arg(series_index + 1).arg(series[series_index+1]).arg(output_unit->get_output());
 	//output_unit
 	//a += ;
 	output_unit->adjust_weights();

@@ -16,7 +16,9 @@
 
 NARX2 *w;
 
+
 NARX *mynarx = NULL;
+
 
 
 void train_progress_inc()
