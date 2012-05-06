@@ -10,6 +10,8 @@
 #include "time.h"
 #include "NARX.h"
 
+
+
 #include "narx_util.h"
 
 extern float *series;
@@ -26,6 +28,8 @@ NARX::NARX(ARCH arch, int H, int a, int b)
 	this->a = a;
 	this->b = b;
 	this->arch = arch;
+
+	ee = new EvaluationEngine(MAX_SERIES_LEN);
 
 	hunits = new Unit*[H];
 	inputs = new InputUnit*[a+1];
@@ -71,13 +75,18 @@ void NARX::train(int epochs)
 		trainEpoch();
 		emit training_epoch_finished();
 	}
-	trainEpoch(true);
+	trainEpoch(false);
 	emit training_epoch_finished();
 }
 
 void NARX::trainEpoch(bool logging)
 {
 //	int ;
+	ee->reset();
+
+	QString str;
+
+
 	for(int series_index = a; series_index < series_len - 1; series_index ++)
 	{
 	for(int i=0;i<a+1;i++) 
@@ -87,7 +96,9 @@ void NARX::trainEpoch(bool logging)
 
 	output_unit->setTarget(series[series_index + 1]);
 
-	QString str = QString("input target:index %1 : %2, output narx: %3").arg(series_index + 1).arg(series[series_index+1]).arg(output_unit->get_output());
+	ee->insertvalue(series[series_index + 1], output_unit->get_output());
+	
+	//QString str = QString("input target:index %1 : %2, output narx: %3").arg(series_index + 1).arg(series[series_index+1]).arg(output_unit->get_output());
 	//output_unit
 	//a += ;
 	output_unit->adjust_weights();
@@ -104,6 +115,9 @@ void NARX::trainEpoch(bool logging)
 	if(logging)
 		_log("Epoch finished :)");
 
+	str = QString("F3 = %1, KS1= %2, KS2=%3, KS12=%4, DA = %5").arg(ee->F3()).arg(ee->KS1())
+		.arg(ee->KS2()).arg(ee->KS12()).arg(ee->DA());
+	_log(str);
 	
 }
 
@@ -116,6 +130,8 @@ NARX::~NARX(void)
 	delete [] hunits;
 	for(int i=0;i<H;i++) delete inputs[i];
 	delete [] inputs;
+
+	delete ee;
 }
 
 void NARX::run()
