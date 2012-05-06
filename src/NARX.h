@@ -3,6 +3,7 @@
 #include "Unit.h"
 #include "InputUnit.h"
 #include "OutputUnit.h"
+#include "EvaluationEngine.h"
 #include "narx_util.h"
 
 class NARX : public QThread
@@ -20,6 +21,8 @@ protected:
 	Unit **hunits;
 	OutputUnit *output_unit;
 	InputUnit **inputs;
+
+	EvaluationEngine *ee;
 
 	void trainEpoch(bool logging = false);
 	void _log(QString str);

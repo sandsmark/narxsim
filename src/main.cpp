@@ -15,6 +15,7 @@
 //#include <QtGui/QApplication>
 
 NARX2 *w;
+FILE *outfile = 0;
 
 
 NARX *mynarx = NULL;
@@ -30,6 +31,11 @@ void LOG(QString text)
 { 
 	 
 	 w->ui.text_log->appendPlainText(text); 
+}
+
+void FLOG(char* text)
+{
+	fprintf(outfile,text);
 }
 
 
@@ -50,6 +56,8 @@ int epochs = 100;
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
+
+	outfile = fopen("log.txt","wt");
 
 	NARX2 w;
 	//w.ui.Frame_generate->setHidden(true);
