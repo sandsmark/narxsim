@@ -5,5 +5,6 @@
 
 void LOG(QString);
 void FLOG(char *);
+void train_result_log(QString);
 
-enum ARCH { MLP = 1000, NAR_D};
+enum ARCH { MLP = 1000, NAR_D, TDNN_X, NARX_D, NARX_Y, NARX_DY, NAR_Y, NAR_DY};

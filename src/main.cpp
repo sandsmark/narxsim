@@ -3,6 +3,7 @@
 #include <SDKDDKVer.h>
 #include "narx2.h"
 #include <QtGui/QApplication>
+#include <QtGui/QMessageBox>
 
 #include "Unit.h"
 #include "Activation_functions.h"
@@ -25,6 +26,9 @@ NARX *mynarx = NULL;
 void train_progress_inc()
 {
 	w->ui.progressbar_train->setValue(w->ui.progressbar_train->value() + 1);
+	if(w->ui.progressbar_train->value() == w->ui.progressbar_train->maximum())
+		 QMessageBox::information(w, "Training complete", "The training is complete."
+		);
 }
 
 void LOG(QString text)
@@ -38,6 +42,11 @@ void FLOG(char* text)
 	fprintf(outfile,text);
 }
 
+void train_result_log(QString text)
+{
+	w->ui.textedit_training->appendPlainText(text); 
+}
+
 
 int series_generated = 0;
 
@@ -46,8 +55,13 @@ int series_len;
 int series_func;
 int series_noise;
 float *series = 0;
+float **exogenous_series;
+
+int *used_exogenous;
 
 int epochs = 100;
+
+int M=0;
 
 
 
@@ -81,6 +95,8 @@ int main(int argc, char *argv[])
 	QObject::connect ( w.ui.Button_tab32, SIGNAL( clicked() ), &w, SLOT( Button_32() ) );
 	QObject::connect ( w.ui.Button_tab43, SIGNAL( clicked() ), &w, SLOT( Button_43() ) );
 	QObject::connect ( w.ui.Button_tab45, SIGNAL( clicked() ), &w, SLOT( Button_45() ) );
+	QObject::connect ( w.ui.Button_tab54, SIGNAL( clicked() ), &w, SLOT( Button_54() ) );
+	QObject::connect ( w.ui.Button_tab56, SIGNAL( clicked() ), &w, SLOT( Button_56() ) );
 	QObject::connect ( w.ui.Button_start_training, SIGNAL( clicked() ), &w, SLOT( Button_start_train() ) );
 
 
@@ -91,6 +107,7 @@ int main(int argc, char *argv[])
 	w.ui.tabWidget->setTabEnabled(2, false);
 	w.ui.tabWidget->setTabEnabled(3, false);
 	w.ui.tabWidget->setTabEnabled(4, false);
+	w.ui.tabWidget->setTabEnabled(5, false);
 	
 	return a.exec();
 }

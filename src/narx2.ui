@@ -109,8 +109,8 @@
        <rect>
         <x>40</x>
         <y>120</y>
-        <width>391</width>
-        <height>221</height>
+        <width>541</width>
+        <height>201</height>
        </rect>
       </property>
       <property name="frameShape">
@@ -125,14 +125,14 @@
       <widget class="QLabel" name="label_2">
        <property name="geometry">
         <rect>
-         <x>20</x>
+         <x>10</x>
          <y>20</y>
-         <width>61</width>
-         <height>16</height>
+         <width>71</width>
+         <height>20</height>
         </rect>
        </property>
        <property name="text">
-        <string>Start value</string>
+        <string>X Start value</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="lineedit_series_start">
@@ -140,7 +140,7 @@
         <rect>
          <x>80</x>
          <y>20</y>
-         <width>291</width>
+         <width>111</width>
          <height>20</height>
         </rect>
        </property>
@@ -151,14 +151,14 @@
       <widget class="QLabel" name="label_3">
        <property name="geometry">
         <rect>
-         <x>20</x>
+         <x>10</x>
          <y>50</y>
-         <width>51</width>
-         <height>16</height>
+         <width>61</width>
+         <height>20</height>
         </rect>
        </property>
        <property name="text">
-        <string>End value</string>
+        <string>X End value</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="lineedit_series_end">
@@ -166,7 +166,7 @@
         <rect>
          <x>80</x>
          <y>50</y>
-         <width>291</width>
+         <width>111</width>
          <height>20</height>
         </rect>
        </property>
@@ -177,7 +177,7 @@
       <widget class="QLabel" name="label_4">
        <property name="geometry">
         <rect>
-         <x>20</x>
+         <x>10</x>
          <y>80</y>
          <width>71</width>
          <height>16</height>
@@ -209,7 +209,7 @@
       <widget class="QLabel" name="label_5">
        <property name="geometry">
         <rect>
-         <x>20</x>
+         <x>10</x>
          <y>110</y>
          <width>71</width>
          <height>16</height>
@@ -232,7 +232,7 @@
       <widget class="QLabel" name="label_7">
        <property name="geometry">
         <rect>
-         <x>20</x>
+         <x>10</x>
          <y>150</y>
          <width>61</width>
          <height>16</height>
@@ -257,6 +257,51 @@
        <property name="value">
         <number>5</number>
        </property>
+      </widget>
+      <widget class="QRadioButton" name="predefined1">
+       <property name="geometry">
+        <rect>
+         <x>280</x>
+         <y>50</y>
+         <width>251</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>s(t) = sin(x+y*s(t-1)) * z + tan(s(t-2) - s(t-3))</string>
+       </property>
+       <attribute name="buttonGroup">
+        <string notr="true">buttonGroup_2</string>
+       </attribute>
+      </widget>
+      <widget class="QLabel" name="label_16">
+       <property name="geometry">
+        <rect>
+         <x>280</x>
+         <y>20</y>
+         <width>141</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Or use a predefined series:</string>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="predefined2">
+       <property name="geometry">
+        <rect>
+         <x>280</x>
+         <y>80</y>
+         <width>131</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>ln(-x) + x ^3 + sin(z)</string>
+       </property>
+       <attribute name="buttonGroup">
+        <string notr="true">buttonGroup_2</string>
+       </attribute>
       </widget>
      </widget>
      <widget class="QCommandLinkButton" name="Button_tab12">
@@ -320,16 +365,35 @@
          <height>192</height>
         </rect>
        </property>
+       <attribute name="horizontalHeaderDefaultSectionSize">
+        <number>170</number>
+       </attribute>
+       <attribute name="horizontalHeaderMinimumSectionSize">
+        <number>40</number>
+       </attribute>
+       <row>
+        <property name="text">
+         <string>Exogenous ?</string>
+        </property>
+       </row>
        <column>
         <property name="text">
-         <string>X (input value)</string>
+         <string>X (input value - exogenous)</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Y (series value)</string>
+         <string>D (series value)</string>
         </property>
        </column>
+       <item row="0" column="0">
+        <property name="text">
+         <string>Use in NARX</string>
+        </property>
+        <property name="checkState">
+         <enum>Checked</enum>
+        </property>
+       </item>
       </widget>
       <widget class="QLabel" name="label_tab1post1">
        <property name="geometry">
@@ -789,7 +853,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Targets regressor size (at least 1)</string>
+       <string>Targets regressor size</string>
       </property>
      </widget>
      <widget class="QSpinBox" name="spinbox_dregressor">
@@ -802,10 +866,10 @@
        </rect>
       </property>
       <property name="minimum">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="value">
-       <number>1</number>
+       <number>0</number>
       </property>
      </widget>
      <widget class="QCommandLinkButton" name="Button_tab45">
@@ -924,6 +988,63 @@
        <string>Start</string>
       </property>
      </widget>
+     <widget class="QPlainTextEdit" name="textedit_training">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>190</y>
+        <width>591</width>
+        <height>161</height>
+       </rect>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCommandLinkButton" name="Button_tab54">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>360</y>
+        <width>91</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Back</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_15">
+      <property name="geometry">
+       <rect>
+        <x>230</x>
+        <y>160</y>
+        <width>171</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Training tests results, per epoch</string>
+      </property>
+     </widget>
+     <widget class="QCommandLinkButton" name="Button_tab56">
+      <property name="geometry">
+       <rect>
+        <x>540</x>
+        <y>360</y>
+        <width>81</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Next</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_6">
+     <attribute name="title">
+      <string>Prediction</string>
+     </attribute>
     </widget>
    </widget>
    <widget class="QPlainTextEdit" name="text_log">
@@ -978,6 +1099,7 @@
  </resources>
  <connections/>
  <buttongroups>
+  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>

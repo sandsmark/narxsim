@@ -20,6 +20,9 @@ public:
 	void insertvalue(double target, double pred);
 
 	double F3();
+	double F1();
+	double F2();
+	double F4();
 
 	double KS1();
 	double KS2();

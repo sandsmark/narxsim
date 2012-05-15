@@ -13,8 +13,12 @@ extern int series_func;
 extern int series_noise;
 extern int series_generated;
 extern float *series;
+extern float **exogenous_series;
+extern int *used_exogenous;
 extern int epochs;
 extern void train_progress_inc();
+
+extern int M;
 
 extern NARX *mynarx;
 
@@ -49,6 +53,7 @@ void NARX2::log()
 {
 	extern QString narx_log_str;
 	LOG(narx_log_str);
+	train_result_log(narx_log_str);
 }
 
 
@@ -86,6 +91,8 @@ void NARX2::Button_12()
 
 	if(series_generated) goto exit1;
 
+	
+
 	series_start = ui.lineedit_series_start->text().toFloat();
 	series_end = ui.lineedit_series_end->text().toFloat();
 	series_len = ui.spinbox_series_len->value();
@@ -98,14 +105,68 @@ void NARX2::Button_12()
 	float step = ( series_end - series_start ) / series_len;
 
 	float cur = series_start;
+	/* hardcoded values for Y and Z variables STARTS HERE  */
+	float cury = 3.0; 
+	float curz = 1.1;
+	float stepy = 0.05;
+	float stepz = -0.03;
+	M = 1;
+	/* end hardcoded values for Y and Z variables */
+
+	if(ui.predefined1->isChecked())
+	{
+		ui.table_series->insertColumn(1);
+		QTableWidgetItem * col1= new QTableWidgetItem();
+		col1->setText("Y (input value - exogenous)");
+		ui.table_series->setHorizontalHeaderItem(1, col1);
+		QTableWidgetItem * exo1= new QTableWidgetItem();
+		ui.table_series->setItem(0, 1, exo1);
+		exo1->setText("Use in NARX");
+		exo1->setCheckState(Qt::Checked);
+
+		ui.table_series->insertColumn(2);
+		QTableWidgetItem * col2= new QTableWidgetItem();
+		col2->setText("Z (input value - exogenous)");
+		ui.table_series->setHorizontalHeaderItem(2, col2);
+		QTableWidgetItem * exo2= new QTableWidgetItem();
+		ui.table_series->setItem(0, 2, exo2);
+		exo2->setText("Use in NARX");
+		exo2->setCheckState(Qt::Checked);
+		
+
+		M=3;
+		
+		//goto pre_exit;
+	}
+	else 
+	{
+			exogenous_series = new float*[1];
+			exogenous_series[0]=new float[series_len];
+			used_exogenous = new int[1];
+			used_exogenous[0]=0;
+	}
+
+		exogenous_series = new float*[M];
+		used_exogenous = new int[M];
+		for(int i=0;i<M;i++)
+		{
+			used_exogenous[i]= 0;
+			exogenous_series[i]=new float[series_len];
+		}
 
 	int i;
+	
+	
+	
 
 	for(i=1; i <= series_len; i++)
 	{
-		ui.table_series->insertRow(i - 1);
+		
+		ui.table_series->insertRow(i );
 		QTableWidgetItem *newItem1 = new QTableWidgetItem(tr("%1").arg(cur));
-		ui. table_series->setItem(i - 1, 0, newItem1);
+		ui. table_series->setItem(i , 0, newItem1);
+
+		exogenous_series[0][i - 1] = cur;
 
 		float val;
 
@@ -133,17 +194,53 @@ void NARX2::Button_12()
 			val = 1.0;
 		};
 
+		
+	if(ui.predefined1->isChecked())
+	{
+		if(i>=4)
+		val = qSin(cur + cury* series[ i - 2 ])* curz  + qTan(series [ i - 3 ] - series [ i - 4 ]);
+		else if(i == 3)
+			val = qSin(cur + cury* series[ i - 2 ])* curz  + qTan(series [ i - 3 ]);
+		else if(i==2)
+			val = qSin(cur + cury* series[ i - 2 ])* curz  ;
+		else 
+			val = qSin(cur + cury)* curz * curz ;
+
+		exogenous_series[1][i - 1] = cury;
+		exogenous_series[2][i - 1] = curz;
+		M=3;
+	}
+
 		if(series_noise)
 			val += val * ((rand() % (2*series_noise) - series_noise)) / 100 ;
 
+
 		QTableWidgetItem *newItem2 = new QTableWidgetItem(tr("%1").arg(val));
 		
-		ui. table_series->setItem(i - 1, 1, newItem2);
 		
+		if(ui.predefined1->isChecked())
+		{
+			QTableWidgetItem *newItemY = new QTableWidgetItem(tr("%1").arg(cury));
+			ui. table_series->setItem(i, 1, newItemY);
+			QTableWidgetItem *newItemZ = new QTableWidgetItem(tr("%1").arg(curz));
+			ui. table_series->setItem(i, 2, newItemZ);
+
+			ui. table_series->setItem(i, 3, newItem2);
+		}
+		else
+			ui. table_series->setItem(i, 1, newItem2);
+
 		series [i - 1] = val;
 		cur+=step;
+
+		if(ui.predefined1->isChecked())
+		{
+			cury+=stepy;
+			curz+=stepz;
+		}
 	}
 	//ui.table_series->removeRow(i);
+pre_exit:
 
 	QMessageBox::information( this, "Proceed", "The series has been generated" );
 
@@ -171,6 +268,12 @@ void NARX2::Button_23()
 {
 	ui.tabWidget->setTabEnabled(2, true);
 	ui.tabWidget->setCurrentIndex(2);
+
+	for(int i=0;i<M;i++)
+	if(ui.table_series->item(0,i)->checkState() == Qt::Checked) {
+		used_exogenous[i] = 1;
+		
+	}
 }
 
 void NARX2::Button_32()
@@ -190,27 +293,7 @@ void NARX2::Button_34()
 
 	
 
-	/* main NARX code */
-	if(!narx_stage1_5)
-	{
-		
-		
-		if (!ui.check_del_targets->isChecked() && !ui.check_del_outputs->isChecked() && !ui.check_exogenous->isChecked())
-		{
-			QMessageBox::information( this, "NARX", "Selected architecture: MLP" );
-			arch = MLP;
-		}
-		if (ui.check_del_targets->isChecked() && !ui.check_del_outputs->isChecked() && !ui.check_exogenous->isChecked())
-		{
-			QMessageBox::information( this, "NARX", "Selected architecture: NAR-D" );
-			arch = NAR_D;
-		}
-
-		narx_stage1_5 = 1;
-		
 	
-	} 
-	/* end of main NARX code */
 
 	if (!ui.check_del_targets->isChecked())
 		ui.spinbox_dregressor->setEnabled(false);
@@ -235,11 +318,94 @@ void NARX2::Button_43()
 }
 void NARX2::Button_45()
 {
-	mynarx = new NARX(arch, ui.spinbox_hidden_units->value(), 0, ui.spinbox_dregressor->value());
+
+	/* main NARX code */
+	if(!narx_stage1_5)
+	{
+		
+		
+		if (!ui.check_del_targets->isChecked() && !ui.check_del_outputs->isChecked() && ui.check_exogenous->isChecked()
+			&& ui.spinbox_xregressor->value()==0)
+		{
+			QMessageBox::information( this, "NARX", "Selected architecture: MLP" );
+			arch = MLP;
+		}
+		if (ui.check_del_targets->isChecked() && !ui.check_del_outputs->isChecked() && !ui.check_exogenous->isChecked())
+		{
+			QMessageBox::information( this, "NARX", "Selected architecture: NAR-D" );
+			arch = NAR_D;
+		}
+		if (!ui.check_del_targets->isChecked() && !ui.check_del_outputs->isChecked() && ui.check_exogenous->isChecked()
+			&& ui.spinbox_xregressor->value()>0)
+		{
+			QMessageBox::information( this, "NARX", "Selected architecture: TDNN-X" );
+			arch = TDNN_X;
+		}
+		if (ui.check_del_targets->isChecked() && !ui.check_del_outputs->isChecked() && ui.check_exogenous->isChecked()
+			&& ui.spinbox_xregressor->value()>0)
+		{
+			QMessageBox::information( this, "NARX", "Selected architecture: NARX-D" );
+			arch = NARX_D;
+		}
+		if (!ui.check_del_targets->isChecked() && ui.check_del_outputs->isChecked() && ui.check_exogenous->isChecked()
+			&& ui.spinbox_xregressor->value()>0)
+		{
+			QMessageBox::information( this, "NARX", "Selected architecture: NARX-Y" );
+			arch = NARX_Y;
+		}
+		if (ui.check_del_targets->isChecked() && ui.check_del_outputs->isChecked() && ui.check_exogenous->isChecked()
+			&& ui.spinbox_xregressor->value()>0)
+		{
+			QMessageBox::information( this, "NARX", "Selected architecture: NARX-DY" );
+			arch = NARX_DY;
+		}
+		if (ui.check_del_targets->isChecked() && !ui.check_del_outputs->isChecked() && !ui.check_exogenous->isChecked()
+			&& 1)
+		{
+			QMessageBox::information( this, "NARX", "Selected architecture: NAR-Y" );
+			arch = NAR_Y;
+		}
+		if (ui.check_del_targets->isChecked() && ui.check_del_outputs->isChecked() && !ui.check_exogenous->isChecked()
+			&& ui.spinbox_xregressor->value()>0)
+		{
+			QMessageBox::information( this, "NARX", "Selected architecture: NAR-DY" );
+			arch = NAR_DY;
+		}
+
+
+		narx_stage1_5 = 1;
+		if(!ui.check_exogenous->isChecked()) // we dont want to use any exogenous
+			M=0;
+		
+		mynarx = new NARX(arch, ui.spinbox_hidden_units->value(), ui.spinbox_xregressor->value(), ui.spinbox_dregressor->value(),
+		M
+		
+		
+		);
+	
+	} 
+	/* end of main NARX code */
+
+
 
 	QObject::connect ( mynarx, SIGNAL( training_epoch_finished() ), this, SLOT( train_progress_inc() ) );
 	QObject::connect ( mynarx, SIGNAL( log() ), this, SLOT( log() ), Qt::BlockingQueuedConnection );
 
 	ui.tabWidget->setTabEnabled(4, true);
 	ui.tabWidget->setCurrentIndex(4);
+	ui.spinbox_xregressor->setEnabled(false);
+	ui.spinbox_yregressor->setEnabled(false);
+	ui.spinbox_dregressor->setEnabled(false);
+}
+
+void NARX2::Button_54()
+{
+	ui.tabWidget->setTabEnabled(3, true);
+	ui.tabWidget->setCurrentIndex(3);
+}
+
+void NARX2::Button_56()
+{
+	ui.tabWidget->setTabEnabled(5, true);
+	ui.tabWidget->setCurrentIndex(5);
 }

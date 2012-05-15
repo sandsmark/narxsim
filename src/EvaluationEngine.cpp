@@ -27,19 +27,55 @@ void EvaluationEngine::insertvalue(double target, double pred)
 	curlen++;
 }
 
+double EvaluationEngine::F1()
+{
+	double ret = 0;
+	
+	for(int i=0;i<curlen;i++)
+	{
+		ret += qPow(series[i] - predicted[i], 2);
+	}
+
+	return qSqrt(ret);
+}
+
+double EvaluationEngine::F2()
+{
+	return F1() / qSqrt(curlen);
+}
+
 double EvaluationEngine::F3()
 {
 	double ret = 0;
 	double sum = 0;
 	for(int i=0;i<curlen;i++)
 	{
-		ret += qSqrt(qAbs(series[i]*series[i] - predicted[i]*predicted[i]));
-		
-		sum += series[i];
+         sum += series[i];
 	}
 
-	return ret/sum;
-	
+	return F2() / sum / curlen;
+}
+
+double EvaluationEngine::F4()
+{
+	double s1 = 0;
+	double s2 = 0;
+	double avg = 0;
+
+	for(int i=0;i<curlen;i++)
+		avg += series[i];
+	avg /= curlen;
+
+	for(int i=0;i<curlen;i++)
+	{
+         s1 += qPow(series[i] - predicted[i], 2);
+		 s2 += qPow(series[i] - avg, 2);
+	}
+	//char test[256];
+	//	sprintf(test, "aa %f %f\n", s1, s2);
+		//FLOG(test);
+
+	return qSqrt(s1/s2);
 }
 
 
