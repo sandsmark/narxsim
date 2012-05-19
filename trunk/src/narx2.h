@@ -25,6 +25,9 @@ public slots:
 	void Button_54();
 	void Button_56();
 	void Menu_about();
+
+	void Button_browse_action();
+
 	void Button_start_train();
 
 	void train_progress_inc();

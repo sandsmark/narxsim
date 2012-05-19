@@ -5,15 +5,16 @@
 #include "NARX.h"
 #include <QtGui/QMessageBox>
 #include <QtCore/qmath.h>
+#include <QFileDialog>
 #include "narx_util.h"
 
-extern float series_start, series_end;
+extern double series_start, series_end;
 extern int series_len;
 extern int series_func;
 extern int series_noise;
 extern int series_generated;
-extern float *series;
-extern float **exogenous_series;
+extern double *series;
+extern double **exogenous_series;
 extern int *used_exogenous;
 extern int epochs;
 extern void train_progress_inc();
@@ -52,7 +53,7 @@ void NARX2::train_progress_inc()
 void NARX2::log()
 {
 	extern QString narx_log_str;
-	LOG(narx_log_str);
+	//LOG(narx_log_str);
 	train_result_log(narx_log_str);
 }
 
@@ -93,25 +94,26 @@ void NARX2::Button_12()
 
 	
 
-	series_start = ui.lineedit_series_start->text().toFloat();
-	series_end = ui.lineedit_series_end->text().toFloat();
+	series_start = ui.lineedit_series_start->text().toDouble();
+	series_end = ui.lineedit_series_end->text().toDouble();
 	series_len = ui.spinbox_series_len->value();
     series_func  = ui.Combo_base_function->currentIndex();
 	series_noise = ui.spinbox_noise->value();
 
 	//switch(series_f)
-	series = new float[series_len];
+	series = new double[series_len];
 
-	float step = ( series_end - series_start ) / series_len;
+	double step = ( series_end - series_start ) / series_len;
 
-	float cur = series_start;
+	double cur = series_start;
 	/* hardcoded values for Y and Z variables STARTS HERE  */
-	float cury = 3.0; 
-	float curz = 1.1;
-	float stepy = 0.05;
-	float stepz = -0.03;
-	M = 1;
+	double cury = 3.0; 
+	double curz = 1.1;
+	double stepy = 0.05;
+	double stepz = -0.03;
 	/* end hardcoded values for Y and Z variables */
+
+	M = 1;
 
 	if(ui.predefined1->isChecked())
 	{
@@ -140,18 +142,18 @@ void NARX2::Button_12()
 	}
 	else 
 	{
-			exogenous_series = new float*[1];
-			exogenous_series[0]=new float[series_len];
+		/*	exogenous_series = new double*[1];
+			exogenous_series[0]=new double[series_len];
 			used_exogenous = new int[1];
-			used_exogenous[0]=0;
+			used_exogenous[0]=0;*/
 	}
 
-		exogenous_series = new float*[M];
+		exogenous_series = new double*[M];
 		used_exogenous = new int[M];
 		for(int i=0;i<M;i++)
 		{
 			used_exogenous[i]= 0;
-			exogenous_series[i]=new float[series_len];
+			exogenous_series[i]=new double[series_len];
 		}
 
 	int i;
@@ -168,7 +170,7 @@ void NARX2::Button_12()
 
 		exogenous_series[0][i - 1] = cur;
 
-		float val;
+		double val;
 
 		switch (series_func)
 		{
@@ -272,7 +274,7 @@ void NARX2::Button_23()
 	for(int i=0;i<M;i++)
 	if(ui.table_series->item(0,i)->checkState() == Qt::Checked) {
 		used_exogenous[i] = 1;
-		
+		LOG("Loaded exogenous variable.");
 	}
 }
 
@@ -287,8 +289,8 @@ void NARX2::Button_34()
 	
 
 	//
-	Unit::alfa = ui.lineedit_learningrate->text().toFloat();
-	epochs = ui.lineedit_epochs->text().toFloat();
+	Unit::alfa = ui.lineedit_learningrate->text().toDouble();
+	epochs = ui.lineedit_epochs->text().toDouble();
 	ui.progressbar_train->setMaximum(epochs);
 
 	
@@ -359,7 +361,7 @@ void NARX2::Button_45()
 			QMessageBox::information( this, "NARX", "Selected architecture: NARX-DY" );
 			arch = NARX_DY;
 		}
-		if (ui.check_del_targets->isChecked() && !ui.check_del_outputs->isChecked() && !ui.check_exogenous->isChecked()
+		if (!ui.check_del_targets->isChecked() && ui.check_del_outputs->isChecked() && !ui.check_exogenous->isChecked()
 			&& 1)
 		{
 			QMessageBox::information( this, "NARX", "Selected architecture: NAR-Y" );
@@ -408,4 +410,76 @@ void NARX2::Button_56()
 {
 	ui.tabWidget->setTabEnabled(5, true);
 	ui.tabWidget->setCurrentIndex(5);
+}
+
+
+void NARX2::Button_browse_action()
+{
+	QString fileName = QFileDialog::getOpenFileName(this,
+     tr("Open series"), ".");
+	//LOG(fileName);
+	FILE *series_file = fopen(fileName.toStdString().c_str(),"rt");
+	if(!series_file) {
+		QMessageBox::information( this, "Error", "Cannot load series." );
+		return;
+	}
+	
+	
+	fscanf(series_file, "%d", &series_len);
+	fscanf(series_file, "%d", &M);
+	LOG(QString("%1.%2").arg(series_len).arg(M));
+	series = new double[series_len];
+
+	exogenous_series = new double*[M];
+	used_exogenous = new int[M];
+	for(int i=0;i<M;i++)
+	{
+		used_exogenous[i]= 0;
+		exogenous_series[i]=new double[series_len];
+	}
+
+	for(int i=0;i<M;i++)
+	{
+		if(i)
+		{
+			//add a new column for the exogenous variable
+		ui.table_series->insertColumn(i);
+		QTableWidgetItem * col1= new QTableWidgetItem();
+		col1->setText(QString("%1 (input value - exogenous)").arg(i));
+		ui.table_series->setHorizontalHeaderItem(i, col1);
+		QTableWidgetItem * exo1= new QTableWidgetItem();
+		ui.table_series->setItem(0, i, exo1);
+		exo1->setText("Use in NARX");
+		exo1->setCheckState(Qt::Checked);
+		}
+
+		double aux;
+
+		for(int j=0;j<series_len;j++) 
+		{
+			if(!i) ui.table_series->insertRow(j +1 );
+
+			fscanf(series_file, "%lf", &aux);
+			exogenous_series[i][j]=aux;
+			QTableWidgetItem *newItemY = new QTableWidgetItem(tr("%1").arg(aux,10));
+			ui. table_series->setItem(j+1, i, newItemY);
+		}
+	}
+
+	double aux;
+
+	for(int j=0;j<series_len;j++) 
+		{
+			//if(!i) ui.table_series->insertRow(j +1 );
+
+			fscanf(series_file, "%lf", &aux);
+			series[j]=aux;
+			QTableWidgetItem *newItemY = new QTableWidgetItem(tr("%1").arg(aux,10));
+			ui. table_series->setItem(j+1, M, newItemY);
+		}
+
+	series_generated = 1;
+	fclose(series_file);
+	QMessageBox::information( this, "Proceed", "Series loaded successfully." );
+
 }
