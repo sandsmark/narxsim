@@ -42,6 +42,7 @@ int Unit::add_input_unit (Unit *unit)
 	input_area[input_count] = unit;
 	
 	//printf("%f\n", input_weights[input_count]);
+	FLOG(QString("input count=%1").arg(input_count).toStdString().c_str());
 	return input_count++;
 }
 
@@ -79,5 +80,6 @@ void Unit::adjust_weights(double superior_layer_delta)
 	for(int i = 0; i < input_count;i ++)
 	{
 		input_weights[i] += Unit::alfa * deltah * input_area[i]->get_output();
+		//FLOG(QString("ok adjust=%1\n").arg(pre_output()).toStdString().c_str());
 	}
 }

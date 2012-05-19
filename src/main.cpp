@@ -37,9 +37,10 @@ void LOG(QString text)
 	 w->ui.text_log->appendPlainText(text); 
 }
 
-void FLOG(char* text)
+void FLOG(const char* text)
 {
 	fprintf(outfile,text);
+	fflush(outfile);
 }
 
 void train_result_log(QString text)
@@ -50,12 +51,12 @@ void train_result_log(QString text)
 
 int series_generated = 0;
 
-float series_start, series_end;
+double series_start, series_end;
 int series_len;
 int series_func;
 int series_noise;
-float *series = 0;
-float **exogenous_series;
+double *series = 0;
+double **exogenous_series;
 
 int *used_exogenous;
 
@@ -98,6 +99,8 @@ int main(int argc, char *argv[])
 	QObject::connect ( w.ui.Button_tab54, SIGNAL( clicked() ), &w, SLOT( Button_54() ) );
 	QObject::connect ( w.ui.Button_tab56, SIGNAL( clicked() ), &w, SLOT( Button_56() ) );
 	QObject::connect ( w.ui.Button_start_training, SIGNAL( clicked() ), &w, SLOT( Button_start_train() ) );
+
+	QObject::connect ( w.ui.button_browse, SIGNAL( clicked() ), &w, SLOT( Button_browse_action() ) );
 
 
 	
