@@ -27,8 +27,11 @@ void train_progress_inc()
 {
 	w->ui.progressbar_train->setValue(w->ui.progressbar_train->value() + 1);
 	if(w->ui.progressbar_train->value() == w->ui.progressbar_train->maximum())
+	{
 		 QMessageBox::information(w, "Training complete", "The training is complete."
 		);
+		 LOG("NARX training complete.");
+	}
 }
 
 void LOG(QString text)
@@ -84,6 +87,7 @@ int main(int argc, char *argv[])
 	/* QtCore.QObject.connect(self.radioButton1,QtCore.SIGNAL("toggled(bool)"),self.radio_activateInput) */
 	w.ui.tabWidget->setCurrentIndex(0);
 	w.ui.frame_1post->setHidden(true);
+	w.ui.frame_load->setHidden(true);
 	//w.ui.RadioButton_generate_series->connect(w.ui, QtCore::SIGNAL("toggled(bool)"),
 	QObject::connect ( w.ui.actionAbout, SIGNAL( triggered() ), &w, SLOT( Menu_about() ) );
 
@@ -99,6 +103,7 @@ int main(int argc, char *argv[])
 	QObject::connect ( w.ui.Button_tab54, SIGNAL( clicked() ), &w, SLOT( Button_54() ) );
 	QObject::connect ( w.ui.Button_tab56, SIGNAL( clicked() ), &w, SLOT( Button_56() ) );
 	QObject::connect ( w.ui.Button_start_training, SIGNAL( clicked() ), &w, SLOT( Button_start_train() ) );
+	QObject::connect ( w.ui.button_predict, SIGNAL( clicked() ), &w, SLOT( Button_predict() ) );
 
 	QObject::connect ( w.ui.button_browse, SIGNAL( clicked() ), &w, SLOT( Button_browse_action() ) );
 
