@@ -1,0 +1,5 @@
+How to compile:
+
+I didn't have time to make a makefile or something.
+I just use visual studio 2010 and compiled my own Qt from sources. Then I use the Qt designer to edit the form ( ui file ) and made a new Qt project in visual studio.
+Maybe in the future I will do some tool but for now this is the only way I know about how to build the project.
