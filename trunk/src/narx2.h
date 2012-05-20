@@ -30,6 +30,8 @@ public slots:
 
 	void Button_start_train();
 
+	void Button_predict();
+
 	void train_progress_inc();
 	void log();
 
