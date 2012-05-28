@@ -38,6 +38,8 @@ NARX *mynarx = NULL;
 
 
 
+
+
 void train_progress_inc()
 {
 	w->ui.progressbar_train->setValue(w->ui.progressbar_train->value() + 1);
@@ -73,7 +75,7 @@ double series_start, series_end;
 int series_len;
 int series_func;
 int series_noise;
-double *series = 0;
+double **series = 0;
 double **exogenous_series;
 
 int *used_exogenous;
@@ -82,7 +84,10 @@ int epochs = 100;
 
 int M=0;
 
+void normalize_f()
+{
 
+}
 
 
 

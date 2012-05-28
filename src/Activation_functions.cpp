@@ -51,6 +51,12 @@ double Activation_functions::identity(double arg)
 	return arg;
 }
 
+double Activation_functions::aslog(double arg)
+{
+	if(arg>0) return qLn (1 + arg);
+	else return - qLn(1 - arg);
+}
+
 double Activation_functions::identity_derv(double arg)
 {
 	return 1;
@@ -64,4 +70,10 @@ double Activation_functions::pol(double arg)
 double Activation_functions::pol_derv(double arg)
 {
 	return qSqrt( ((1+ arg* arg) - arg*arg / qSqrt(1 + arg * arg) )/ (1+ arg * arg));
+}
+
+double Activation_functions::aslog_derv(double arg)
+{
+	if(arg) return 1/(1+arg);
+	else return 1/(1-arg);
 }

@@ -31,11 +31,12 @@ protected:
 	int a;
 	int b;
 	int M;
+	int N;
 
 	ARCH arch;
 
 	Unit **hunits;
-	OutputUnit *output_unit;
+	OutputUnit **output_units;
 	InputUnit **inputs;
 
 	InputUnit **feedbacks;
@@ -43,8 +44,9 @@ protected:
 	InputUnit **exogenous;
 
 	EvaluationEngine *ee;
+	EvaluationEngine *rw;
 
-	void trainEpoch(bool logging = false);
+	void trainEpoch(bool logging, int epo);
 	void _log(QString str);
 
 	void push_weights();
@@ -52,7 +54,7 @@ protected:
 	void run();
 
 public:
-	NARX(ARCH arch, int H = 1, int a = 0, int b = 0, int M = 0);
+	NARX(ARCH arch, int H = 1, int hact = 2, int a = 0, int b = 0, int M = 0, int N = 1);
 	~NARX(void);
 
 	void train(int epochs);

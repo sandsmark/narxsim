@@ -26,7 +26,7 @@ permissions and limitations under the License.
 
 #include "narx_util.h"
 
-extern double *series;
+extern double **series;
 extern int series_len;
 extern int epochs;
 extern double **exogenous_series;
@@ -35,7 +35,7 @@ extern int *used_exogenous;
 QString narx_log_str;
 
 
-NARX::NARX(ARCH arch, int H, int a, int b, int M)
+NARX::NARX(ARCH arch, int H, int hact, int a, int b, int M, int N)
 {
 
 	this->H = H;
@@ -43,18 +43,32 @@ NARX::NARX(ARCH arch, int H, int a, int b, int M)
 	this->b = b;
 	this->arch = arch;
 	this->M = M;
+	this->N = N;
 
-	ee = new EvaluationEngine(MAX_SERIES_LEN);
+	ee = new EvaluationEngine(series_len);
+	rw = new EvaluationEngine(series_len);
 
 	hunits = new Unit*[H];
 	inputs = new InputUnit*[b];
 	for(int i=0;i<H;i++) 
 	{
 		hunits[i] = new Unit();
-	//	hunits[i]->set_activation_func(Activation_functions::sigmoid);
-		//hunits[i]->set_activation_func_derv(Activation_functions::sigmoid_derv);
-		hunits[i]->set_activation_func(Activation_functions::Bsigmoid);
-		hunits[i]->set_activation_func_derv(Activation_functions::Bsigmoid_derv);
+		if(hact == 2)
+		{
+			hunits[i]->set_activation_func(Activation_functions::aslog);
+		    hunits[i]->set_activation_func_derv(Activation_functions::aslog_derv);
+		}
+		else if (hact == 1)
+		{
+			hunits[i]->set_activation_func(Activation_functions::Bsigmoid);
+		    hunits[i]->set_activation_func_derv(Activation_functions::Bsigmoid_derv);
+		}
+		else if (hact == 0)
+		{
+			hunits[i]->set_activation_func(Activation_functions::sigmoid);
+			hunits[i]->set_activation_func_derv(Activation_functions::sigmoid_derv);
+		}
+		
 		
 	}
 
@@ -84,13 +98,18 @@ NARX::NARX(ARCH arch, int H, int a, int b, int M)
 	
 
 	//printf("%d\n", index);
-	output_unit = new OutputUnit();
-	//output_unit->setTarget(series[series_index+1]);
-	output_unit->set_activation_func(Activation_functions::identity);
-	output_unit->set_activation_func_derv(Activation_functions::identity_derv);
+	output_units = new OutputUnit*[N];
+	for(int i=0;i<N;i++)
+	{
+		output_units[i]=new OutputUnit();
+	
+		output_units[i]->set_activation_func(Activation_functions::identity);
+		output_units[i]->set_activation_func_derv(Activation_functions::identity_derv);
+	}
 	
 	for(int i=0;i<H;i++)
-		output_unit->add_input_unit(hunits[i]);
+		for(int j=0;j<N;j++)
+		output_units[j]->add_input_unit(hunits[i]);
 
 	
 	//hunits[0]->
@@ -104,19 +123,20 @@ ARCH NARX::getArch()
 
 void NARX::train(int epochs)
 {
-	for(int i=0;i<epochs - 1;i++) {
+	for(int i=0;i<epochs;i++) {
 		
-		trainEpoch();
+		trainEpoch(false, i);
 		emit training_epoch_finished();
 	}
-	trainEpoch(false);
-	emit training_epoch_finished();
+	//trainEpoch(false, epochs);
+	//emit training_epoch_finished();
 }
 
-void NARX::trainEpoch(bool logging)
+void NARX::trainEpoch(bool logging, int epo)
 {
 //	int ;
 	ee->reset();
+	rw->reset();
 
 	
 
@@ -129,7 +149,7 @@ void NARX::trainEpoch(bool logging)
 	for(int i=1;i<=b;i++) 
 	{
 		
-		inputs[i - 1]->set_input(series[ series_index - i - a + b  ]);
+		inputs[i - 1]->set_input(series[0][ series_index - i - a + b  ]);
 	}
 	
 	
@@ -145,16 +165,17 @@ void NARX::trainEpoch(bool logging)
 		}
 	}
 
-	
-	output_unit->setTarget(series[series_index]);
+	for(int i=0;i<N;i++)
+		output_units[i]->setTarget(series[i][series_index]);
 
-	ee->insertvalue(series[series_index], output_unit->get_output());
+	ee->insertvalue(series[0][series_index], output_units[0]->get_output());
+	rw->insertvalue(series[0][series_index], series[0][series_index>0 ? series_index - 1 : 0]);
 	
 	//FLOG(QString("input target:index %1 : %2, output narx: %3\n").arg(series_index).arg(series[series_index]).arg(output_unit->get_output()).toStdString().c_str());
 	//output_unit
 	//a += ;
-	output_unit->adjust_weights();
-	double delta = output_unit->get_delta();
+	output_units[0]->adjust_weights();
+	double delta = output_units[0]->get_delta();
 	//FLOG(QString("ok delta=%1\n").arg(delta).toStdString().c_str());
 	for(int i=0;i<H;i++) 
 	{
@@ -178,10 +199,13 @@ void NARX::trainEpoch(bool logging)
 	if(logging)
 		_log("Epoch finished :)");
 
-	str = QString("F1 = %1; F2 = %2; F3 = %3; F4 = %4 KS1= %5; KS2=%6; KS12=%7; DA = %8")
+	str = QString("epoch %1: F1 = %2; F2 = %3; F3 = %4; F4 = %5; KS1= %6; KS2=%7; KS12=%8; DA = %9"
+		"; F1RW=%10; F2RW=%11; F3RW=%12; F4RW=%13; KS1=%14; KS2=%15; KS12=%16; DA=%17").arg(epo)
 		.arg(ee->F1()).arg(ee->F2()).arg(ee->F3()).arg(ee->F4())
 		.arg(ee->KS1())
-		.arg(ee->KS2()).arg(ee->KS12()).arg(ee->DA());
+		.arg(ee->KS2()).arg(ee->KS12()).arg(ee->DA())
+		.arg(rw->F1()).arg(rw->F2()).arg(rw->F3()).arg(rw->F4())
+		.arg(rw->KS1()).arg(rw->KS2()).arg(rw->KS12()).arg(rw->DA());
 	_log(str);
 	
 }
@@ -189,8 +213,8 @@ void NARX::trainEpoch(bool logging)
 
 NARX::~NARX(void)
 {
-
-	delete output_unit;
+	for(int i=0;i<N;i++) delete output_units[i];
+	delete []output_units;
 	for(int i=0;i<H;i++) delete hunits[i];
 	delete [] hunits;
 	for(int i=0;i<b;i++) delete inputs[i];

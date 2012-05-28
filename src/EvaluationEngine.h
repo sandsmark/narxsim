@@ -22,6 +22,7 @@ protected:
 
 	double *series;
 	double *predicted;
+	
 
 
 	double Fd(double val);

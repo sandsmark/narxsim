@@ -30,13 +30,17 @@ extern int series_len;
 extern int series_func;
 extern int series_noise;
 extern int series_generated;
-extern double *series;
+extern double **series;
 extern double **exogenous_series;
 extern int *used_exogenous;
 extern int epochs;
 extern void train_progress_inc();
 
 extern int M;
+
+int N;
+
+int normalize = 1;
 
 int old_M=0;
 
@@ -58,6 +62,13 @@ NARX2::NARX2(QWidget *parent, Qt::WFlags flags)
 	ui.Combo_base_function->addItem( "sqr");
 	ui.Combo_base_function->addItem( "hip");
 	ui.Combo_base_function->addItem( "lin");
+
+	ui.combo_hunits_act->addItem("sigmoid");
+	ui.combo_hunits_act->addItem("Beta=0.1 Bsigmoid");
+	ui.combo_hunits_act->addItem("antisymmetric log");
+	ui.combo_hunits_act->setCurrentIndex(2);
+
+	ui.combo_ounits_act->addItem("linear");
 
 }
 
@@ -114,7 +125,7 @@ void NARX2::Button_12()
 
 	if(series_generated) goto exit1;
 
-	
+	N = 1;
 
 	series_start = ui.lineedit_series_start->text().toDouble();
 	series_end = ui.lineedit_series_end->text().toDouble();
@@ -123,7 +134,9 @@ void NARX2::Button_12()
 	series_noise = ui.spinbox_noise->value();
 
 	//switch(series_f)
-	series = new double[series_len];
+	series = new double*[N];
+	for(int i=0;i<N;i++)
+		series[i] =  new double[series_len];
 
 	double step = ( series_end - series_start ) / series_len;
 
@@ -136,6 +149,7 @@ void NARX2::Button_12()
 	/* end hardcoded values for Y and Z variables */
 
 	M = 1;
+	
 
 	if(ui.predefined1->isChecked())
 	{
@@ -222,11 +236,11 @@ void NARX2::Button_12()
 	if(ui.predefined1->isChecked())
 	{
 		if(i>=4)
-		val = qSin(cur + cury* series[ i - 2 ])* curz  + qTan(series [ i - 3 ] - series [ i - 4 ]);
+		val = qSin(cur + cury* series[0][ i - 2 ])* curz  + qTan(series [0][ i - 3 ] - series[0] [ i - 4 ]);
 		else if(i == 3)
-			val = qSin(cur + cury* series[ i - 2 ])* curz  + qTan(series [ i - 3 ]);
+			val = qSin(cur + cury* series[0][ i - 2 ])* curz  + qTan(series[0] [ i - 3 ]);
 		else if(i==2)
-			val = qSin(cur + cury* series[ i - 2 ])* curz  ;
+			val = qSin(cur + cury* series[0][ i - 2 ])* curz  ;
 		else 
 			val = qSin(cur + cury)* curz * curz ;
 
@@ -254,7 +268,7 @@ void NARX2::Button_12()
 		else
 			ui. table_series->setItem(i, 1, newItem2);
 
-		series [i - 1] = val;
+		series [0][i - 1] = val;
 		cur+=step;
 
 		if(ui.predefined1->isChecked())
@@ -269,13 +283,14 @@ pre_exit:
 	QMessageBox::information( this, "Proceed", "The series has been generated." );
 	LOG("The series has been generated.");
 
-	
+	normalize = ui.checkBox_normalize->isChecked();
 
 	
 exit1:
 	//if(series_generated)
 	ui.tabWidget->setCurrentIndex(1);
     ui.tabWidget->setTabEnabled(1, true);
+	ui.checkBox_normalize->setEnabled(false);
 	series_generated = 1;
     //ui.tabWidget->setTabEnabled(0, false);
 
@@ -423,7 +438,9 @@ void NARX2::Button_45()
 		if(!ui.check_exogenous->isChecked()) // we dont want to use any exogenous
 			M=0;
 		
-		mynarx = new NARX(arch, ui.spinbox_hidden_units->value(), ui.spinbox_xregressor->value(), ui.spinbox_dregressor->value(),
+		mynarx = new NARX(arch, ui.spinbox_hidden_units->value(), 
+			/* now the act func for hiddens */ ui.combo_hunits_act->currentIndex(),
+			ui.spinbox_xregressor->value(), ui.spinbox_dregressor->value(),
 		M
 		
 		
@@ -444,6 +461,8 @@ void NARX2::Button_45()
 	ui.spinbox_dregressor->setEnabled(false);
 	ui.lineedit_epochs->setEnabled(false);
 	ui.lineedit_learningrate->setEnabled(false);
+	ui.combo_hunits_act->setEnabled(false);
+	ui.combo_ounits_act->setEnabled(false);
 }
 
 void NARX2::Button_54()
@@ -503,8 +522,13 @@ void NARX2::Button_browse_action()
 	
 	fscanf(series_file, "%d", &series_len);
 	fscanf(series_file, "%d", &M);
-	LOG(QString("Loading %1 values from file.").arg(series_len).arg(M));
-	series = new double[series_len];
+	fscanf(series_file, "%d", &N);
+	LOG(QString("Loading %1 values from file.\nLoading %2 target series").arg(series_len).arg(N));
+
+	series = new double*[N];
+
+	for(int i = 0;i<N; i++)
+		series[i] = new double[series_len];
 
 	exogenous_series = new double*[M];
 	used_exogenous = new int[M];
@@ -543,15 +567,21 @@ void NARX2::Button_browse_action()
 	}
 
 	double aux;
-
+	for(int i=0;i<N;i++)
 	for(int j=0;j<series_len;j++) 
 		{
 			//if(!i) ui.table_series->insertRow(j +1 );
-
+			if(i)
+			{
+				ui.table_series->insertColumn(M+i);
+				QTableWidgetItem * col1= new QTableWidgetItem();
+				col1->setText(QString("D%1 (target values)").arg(i));
+				ui.table_series->setHorizontalHeaderItem(M+i, col1);
+			}
 			fscanf(series_file, "%lf", &aux);
-			series[j]=aux;
+			series[i][j]=aux;
 			QTableWidgetItem *newItemY = new QTableWidgetItem(tr("%1").arg(aux,10));
-			ui. table_series->setItem(j+1, M, newItemY);
+			ui. table_series->setItem(j+1, M+i, newItemY);
 		}
 
 	series_generated = 1;

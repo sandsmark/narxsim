@@ -49,14 +49,15 @@ double EvaluationEngine::F1()
 	for(int i=0;i<curlen;i++)
 	{
 		ret += qPow(series[i] - predicted[i], 2);
+		//FLOG(QString(":%1\n").arg(predicted[i]).toStdString().c_str());
 	}
 
-	return qSqrt(ret);
+	return (ret);
 }
 
 double EvaluationEngine::F2()
 {
-	return F1() / qSqrt(curlen);
+	return qSqrt(F1() / (curlen));
 }
 
 double EvaluationEngine::F3()
@@ -65,7 +66,7 @@ double EvaluationEngine::F3()
 	double sum = 0;
 	for(int i=0;i<curlen;i++)
 	{
-         sum += series[i];
+         sum += qAbs(series[i]);
 	}
 
 	return F2() / sum / curlen;
@@ -78,7 +79,7 @@ double EvaluationEngine::F4()
 	double avg = 0;
 
 	for(int i=0;i<curlen;i++)
-		avg += series[i];
+		avg += qAbs(series[i]);
 	avg /= curlen;
 
 	for(int i=0;i<curlen;i++)
