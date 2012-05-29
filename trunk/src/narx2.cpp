@@ -40,7 +40,7 @@ extern int M;
 
 int N;
 
-int normalize = 1;
+extern int normalize;
 
 int old_M=0;
 
@@ -97,6 +97,7 @@ void NARX2::Menu_about()
 
 void NARX2::Button_start_train()
 {
+	normalize_f();
 	mynarx->start();
 	ui.Button_start_training->setEnabled(false);
 }
@@ -334,9 +335,7 @@ void NARX2::Button_34()
 	
 
 	//
-	Unit::alfa = ui.lineedit_learningrate->text().toDouble();
-	epochs = ui.lineedit_epochs->text().toDouble();
-	ui.progressbar_train->setMaximum(epochs);
+	
 
 	
 
@@ -368,7 +367,10 @@ void NARX2::Button_45()
 	/* main NARX code */
 	if(!narx_stage1_5)
 	{
-		
+		Unit::alfa = ui.lineedit_learningrate->text().toDouble();
+		epochs = ui.lineedit_epochs->text().toDouble();
+		LOG(QString("epochs:%1, lrate=%2, H=%3").arg(epochs).arg(Unit::alfa).arg(ui.spinbox_hidden_units->value()));
+		ui.progressbar_train->setMaximum(epochs);
 		
 		if (!ui.check_del_targets->isChecked() && !ui.check_del_outputs->isChecked() && ui.check_exogenous->isChecked()
 			&& ui.spinbox_xregressor->value()==0)

@@ -27,11 +27,13 @@ permissions and limitations under the License.
 #include "stdlib.h"
 #include "time.h"
 #include "NARX.h"
+#include "qmath.h"
 
 //#include <QtGui/QApplication>
 
 NARX2 *w;
 FILE *outfile = 0;
+int normalize = 1;
 
 
 NARX *mynarx = NULL;
@@ -78,6 +80,13 @@ int series_noise;
 double **series = 0;
 double **exogenous_series;
 
+double **Nseries = 0;
+
+double *Nvariance ;
+double *N_E ;
+extern int N;
+
+
 int *used_exogenous;
 
 int epochs = 100;
@@ -86,7 +95,42 @@ int M=0;
 
 void normalize_f()
 {
+	if(!normalize) {Nseries = series;return;}
 
+	N_E =  new double[N];
+	Nvariance = new double[N];
+
+	for(int i=0;i<N;i++)
+	{
+		N_E[i] = 0;
+		Nvariance[i] = 1;
+	}
+	for(int j=0;j<N;j++)
+	{
+		for(int i=0;i<series_len;i++) N_E[j]+=series[j][i];
+	    N_E[j]/=series_len;
+	}
+	for(int j=0;j<N;j++)
+	{
+		for(int i=0;i<series_len;i++) Nvariance[j]+=qPow(series[j][i]-N_E[j], 2);
+		Nvariance[j]/=series_len;
+	}
+
+	Nseries = new double*[N];
+	for (int i=0;i<N;i++)
+	{
+		Nseries[i]=new double[series_len];
+		
+	}
+
+	
+
+	for(int j=0;j<N;j++)
+	
+		for(int i=0;i<series_len;i++) {
+			Nseries[j][i] = (series[j][i] - N_E[j])/Nvariance[j];
+			FLOG(QString("norm series:%1\n").arg(Nseries[j][i]).toStdString().c_str());
+		}
 }
 
 
