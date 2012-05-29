@@ -27,6 +27,7 @@ permissions and limitations under the License.
 #include "narx_util.h"
 
 extern double **series;
+extern double **Nseries;
 extern int series_len;
 extern int epochs;
 extern double **exogenous_series;
@@ -149,7 +150,7 @@ void NARX::trainEpoch(bool logging, int epo)
 	for(int i=1;i<=b;i++) 
 	{
 		
-		inputs[i - 1]->set_input(series[0][ series_index - i - a + b  ]);
+		inputs[i - 1]->set_input(Nseries[0][ series_index - i - a + b  ]);
 	}
 	
 	
@@ -166,10 +167,10 @@ void NARX::trainEpoch(bool logging, int epo)
 	}
 
 	for(int i=0;i<N;i++)
-		output_units[i]->setTarget(series[i][series_index]);
+		output_units[i]->setTarget(Nseries[i][series_index]);
 
-	ee->insertvalue(series[0][series_index], output_units[0]->get_output());
-	rw->insertvalue(series[0][series_index], series[0][series_index>0 ? series_index - 1 : 0]);
+	ee->insertvalue(Nseries[0][series_index], output_units[0]->get_output());
+	rw->insertvalue(Nseries[0][series_index], Nseries[0][series_index>0 ? series_index - 1 : 0]);
 	
 	//FLOG(QString("input target:index %1 : %2, output narx: %3\n").arg(series_index).arg(series[series_index]).arg(output_unit->get_output()).toStdString().c_str());
 	//output_unit

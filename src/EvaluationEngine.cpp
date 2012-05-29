@@ -149,9 +149,12 @@ double EvaluationEngine::DA()
 {
 	double ret=0;
 	for(int i=0;i<curlen;i++) {
+		if(Fd(predicted[i])!=0 && Fd(predicted[curlen-1-i])!=0) 
 		ret+=(2*i+1)/curlen * ( qLn(Fd(predicted[i])) + qLn(Fd(predicted[curlen-1-i])));
-		////char test[256];
-		//sprintf(test, "aa %f %f\n", Fd(predicted[i]),(2*i+1)/curlen * ( qLn(Fd(predicted[i])) + qLn(Fd(predicted[curlen-1-i]))));
+		//char test[256];
+		//sprintf(test, "aa %f %f %f\n", Fd(predicted[i]),(2*i+1)/curlen * ( qLn(Fd(predicted[i])) + qLn(Fd(predicted[curlen-1-i])))
+		//	,ret
+		//	);
 		//FLOG(test);
 	}
 	return - curlen - ret;
