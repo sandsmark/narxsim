@@ -12,21 +12,19 @@ BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 or implied. See the License for the specific language governing
 permissions and limitations under the License.
 */
+
 #pragma once
-#include "unit.h"
-
-class InputUnit : public Unit
+class FeedbackInfo
 {
-private:
-	double input_value;
 public:
-	InputUnit(double input);
-	InputUnit();
-	~InputUnit(void);
+	double *Y;
+	double *X;
+	double *D;
 
-	virtual double get_output();
-	void set_input(double arg);
-	double get_input();
+	int x, y, d;
 
+public:
+	FeedbackInfo(int x, int y, int d);
+	~FeedbackInfo(void);
 };
 

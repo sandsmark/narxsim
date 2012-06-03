@@ -49,5 +49,12 @@ public:
 
 	virtual void adjust_weights();
 	virtual void adjust_weights(double superior_layer_delta);
+
+	double *weights();
+	int inputcount();
+
+	void copy(Unit *u);
+	void sum(Unit *u);
+	void divide(int len);
 };
 

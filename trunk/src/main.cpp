@@ -109,11 +109,15 @@ void normalize_f()
 	{
 		for(int i=0;i<series_len;i++) N_E[j]+=series[j][i];
 	    N_E[j]/=series_len;
+
+		
 	}
 	for(int j=0;j<N;j++)
 	{
 		for(int i=0;i<series_len;i++) Nvariance[j]+=qPow(series[j][i]-N_E[j], 2);
 		Nvariance[j]/=series_len;
+
+		LOG(QString("Normalized target series %1, E=%2, variance = %3").arg(j).arg(N_E[j]).arg(Nvariance[j]));
 	}
 
 	Nseries = new double*[N];
@@ -129,7 +133,7 @@ void normalize_f()
 	
 		for(int i=0;i<series_len;i++) {
 			Nseries[j][i] = (series[j][i] - N_E[j])/Nvariance[j];
-			FLOG(QString("norm series:%1\n").arg(Nseries[j][i]).toStdString().c_str());
+			//FLOG(QString("norm series:%1\n").arg(Nseries[j][i]).toStdString().c_str());
 		}
 }
 

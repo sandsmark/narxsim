@@ -341,10 +341,10 @@ void NARX2::Button_34()
 
 	
 
-	if (!ui.check_del_targets->isChecked())
+	if (!ui.check_del_targets->isChecked() && !ui.check_del_outputs->isChecked())
 		ui.spinbox_dregressor->setEnabled(false);
-	if (!ui.check_del_outputs->isChecked())
-		ui.spinbox_yregressor->setEnabled(false);
+	//if (!ui.check_del_outputs->isChecked())
+	//	ui.spinbox_yregressor->setEnabled(false);
 	if (!ui.check_exogenous->isChecked())
 		ui.spinbox_xregressor->setEnabled(false);
 
@@ -443,8 +443,11 @@ void NARX2::Button_45()
 		mynarx = new NARX(arch, ui.spinbox_hidden_units->value(), 
 			/* now the act func for hiddens */ ui.combo_hunits_act->currentIndex(),
 			ui.spinbox_xregressor->value(), ui.spinbox_dregressor->value(),
-		M
-		
+		M,
+		N,// output units
+
+		ui.check_del_outputs->isChecked(), //feedback
+		ui.check_del_targets->isChecked()
 		
 		);
 	
@@ -459,7 +462,7 @@ void NARX2::Button_45()
 	ui.tabWidget->setTabEnabled(4, true);
 	ui.tabWidget->setCurrentIndex(4);
 	ui.spinbox_xregressor->setEnabled(false);
-	ui.spinbox_yregressor->setEnabled(false);
+	//ui.spinbox_yregressor->setEnabled(false);
 	ui.spinbox_dregressor->setEnabled(false);
 	ui.lineedit_epochs->setEnabled(false);
 	ui.lineedit_learningrate->setEnabled(false);

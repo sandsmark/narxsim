@@ -74,6 +74,6 @@ double Activation_functions::pol_derv(double arg)
 
 double Activation_functions::aslog_derv(double arg)
 {
-	if(arg) return 1/(1+arg);
+	if(arg>0) return 1/(1+arg);
 	else return 1/(1-arg);
 }
