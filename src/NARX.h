@@ -33,7 +33,12 @@ protected:
 	int M;
 	int N;
 
+	int feedback, targets;
+
 	ARCH arch;
+
+
+	int hact;
 
 	Unit **hunits;
 	OutputUnit **output_units;
@@ -43,8 +48,10 @@ protected:
 
 	InputUnit **exogenous;
 
-	EvaluationEngine *ee;
-	EvaluationEngine *rw;
+	double **Y;
+
+	EvaluationEngine **ee;
+	EvaluationEngine **rw;
 
 	void trainEpoch(bool logging, int epo);
 	void _log(QString str);
@@ -54,12 +61,16 @@ protected:
 	void run();
 
 public:
-	NARX(ARCH arch, int H = 1, int hact = 2, int a = 0, int b = 0, int M = 0, int N = 1);
+	NARX(ARCH arch, int H = 1, int hact = 2, int a = 0, int b = 0, int M = 0, int N = 1, int feedback = 0, int targets = 0);
 	~NARX(void);
 
 	void train(int epochs);
 
 	ARCH getArch();
+
+	void copy(NARX *n);
+	void sum(NARX *n);
+	void divide(int len);
 
 signals:
 	void training_epoch_finished();

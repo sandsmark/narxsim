@@ -41,3 +41,8 @@ void InputUnit::set_input(double arg)
 {
 	input_value = arg;
 }
+
+double InputUnit::get_input()
+{
+	return input_value;
+}

@@ -26,6 +26,9 @@ Unit::Unit(void)
 	input_count = 0;
 	input_weights = new double[MAX_INPUTS_PER_UNIT];
 
+	for(int i =0; i < MAX_INPUTS_PER_UNIT;i ++)
+		input_weights[i] = (double) (rand() % 100) / 100;
+
 	bias = (double) (rand() % 100) / 100;
 
 	output = 0;
@@ -57,7 +60,7 @@ int Unit::add_input_unit (Unit *unit)
 	input_area[input_count] = unit;
 	
 	//printf("%f\n", input_weights[input_count]);
-	FLOG(QString("input count=%1").arg(input_count).toStdString().c_str());
+	//FLOG(QString("input count=%1").arg(input_count).toStdString().c_str());
 	return input_count++;
 }
 
@@ -66,7 +69,7 @@ double Unit::pre_output()
 	double preoutput = 0;
 	for (int i=0; i < input_count; i++)
 		preoutput += input_area[i]->get_output() * input_weights[i];
-
+	//FLOG(QString("testing%1\n").arg(preoutput).toStdString().c_str());
 	preoutput += bias;
 	return preoutput;
 }
@@ -90,11 +93,39 @@ void Unit::adjust_weights()
 void Unit::adjust_weights(double superior_layer_delta)
 {
 	
-	double deltah =  activation_func_derv(pre_output()) * superior_layer_delta * get_output();
+	double deltah =  activation_func_derv(pre_output()) * superior_layer_delta ; // * get_output();
 	
 	for(int i = 0; i < input_count;i ++)
 	{
 		input_weights[i] += Unit::alfa * deltah * input_area[i]->get_output();
-		//FLOG(QString("ok adjust=%1\n").arg(pre_output()).toStdString().c_str());
+		//FLOG(QString("ok adjust=%1\n").arg(Unit::alfa * deltah * input_area[i]->get_output()).toStdString().c_str());
 	}
+}
+
+double *Unit::weights()
+{
+	return input_weights;
+}
+
+int Unit::inputcount()
+{
+	return input_count;
+}
+
+void Unit::copy(Unit *u)
+{
+	for(int i=0;i<input_count;i++)
+		input_weights[i] = u->input_weights[i];
+}
+
+void Unit::sum(Unit *u)
+{
+	for(int i=0;i<input_count;i++)
+		input_weights[i] += u->input_weights[i];
+}
+
+void Unit::divide(int len)
+{
+	for(int i=0;i<input_count;i++)
+		input_weights[i] /= len;
 }

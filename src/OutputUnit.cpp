@@ -14,12 +14,18 @@ permissions and limitations under the License.
 */
 
 #include "OutputUnit.h"
+#include "Unit.h"
+#include "assert.h"
+#include "narx_util.h"
 
 
-OutputUnit::OutputUnit(void)
+OutputUnit::OutputUnit(void):Unit()
 {
 
 	target = 0;
+	old_weights = new double[MAX_INPUTS_PER_UNIT];
+	for(int i =0; i < MAX_INPUTS_PER_UNIT;i ++)
+		old_weights[i] = input_weights[i];
 }
 
 
@@ -40,16 +46,34 @@ double OutputUnit::error()
 
 void OutputUnit::adjust_weights()
 {
-	deltao = activation_func_derv(pre_output()) * error();
+	//deltao = activation_func_derv(pre_output()) * error();
 
 	for(int i = 0; i < input_count;i ++)
 	{
 		input_weights[i] += Unit::alfa * deltao * input_area[i]->get_output();
+		
 	}
 	
 }
 
-double OutputUnit::get_delta()
+void OutputUnit::compute_delta()
 {
-	return deltao;
+	deltao = activation_func_derv(pre_output()) * error();
+}
+
+double OutputUnit::get_delta(Unit *u)
+{
+
+	for (int i = 0;i<input_count;i++)
+		if (u == input_area[i])
+	      return deltao * old_weights[i];
+
+	assert(false);
+	return 0;
+}
+
+void OutputUnit::fix_weights()
+{
+	for(int i = 0; i < input_count;i ++)
+	old_weights[i] = input_weights[i];
 }

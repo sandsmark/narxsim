@@ -12,21 +12,34 @@ BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 or implied. See the License for the specific language governing
 permissions and limitations under the License.
 */
-#pragma once
-#include "unit.h"
 
-class InputUnit : public Unit
+#include "FeedbackInfo.h"
+
+extern int series_len;
+
+
+FeedbackInfo::FeedbackInfo(int x, int y, int d)
 {
-private:
-	double input_value;
-public:
-	InputUnit(double input);
-	InputUnit();
-	~InputUnit(void);
+	this->x=x;
+	this->y=y;
+	this->d=d;
 
-	virtual double get_output();
-	void set_input(double arg);
-	double get_input();
+	X = new double[x];
+	
+	Y = new double[y];
+	
+	D = new double[d];
+	
+}
 
-};
 
+FeedbackInfo::~FeedbackInfo(void)
+{
+
+	
+	delete []X;
+
+	delete [] Y;
+
+	delete [] D;
+}

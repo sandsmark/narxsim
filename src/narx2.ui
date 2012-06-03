@@ -882,7 +882,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>20</y>
+        <y>10</y>
         <width>171</width>
         <height>21</height>
        </rect>
@@ -937,23 +937,13 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>60</y>
+        <y>30</y>
         <width>171</width>
         <height>21</height>
        </rect>
       </property>
       <property name="text">
        <string>Outputs regressor size (feedback)</string>
-      </property>
-     </widget>
-     <widget class="QSpinBox" name="spinbox_yregressor">
-      <property name="geometry">
-       <rect>
-        <x>200</x>
-        <y>60</y>
-        <width>71</width>
-        <height>22</height>
-       </rect>
       </property>
      </widget>
      <widget class="QLabel" name="label_14">
