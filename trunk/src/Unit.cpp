@@ -16,6 +16,7 @@ permissions and limitations under the License.
 #include "Unit.h"
 #include "narx_util.h"
 #include "stdlib.h"
+#include "assert.h"
 
 
 double Unit::alfa = 0.2;
@@ -31,6 +32,10 @@ Unit::Unit(void)
 
 	bias = (double) (rand() % 100) / 100;
 
+	old_weights = new double[MAX_INPUTS_PER_UNIT];
+	for(int i =0; i < MAX_INPUTS_PER_UNIT;i ++)
+		old_weights[i] = input_weights[i];
+
 	output = 0;
 }
 
@@ -39,6 +44,7 @@ Unit::~Unit(void)
 {
 	delete [] input_area;
 	delete [] input_weights;
+	delete [] old_weights;
 }
 
 
@@ -85,15 +91,14 @@ double Unit::get_output()
 	return output;
 }
 
-void Unit::adjust_weights()
-{
 
+void Unit::compute_delta(double superior_layer_delta)
+{
+		deltah =  activation_func_derv(pre_output()) * superior_layer_delta ; // * get_output();
 }
 
-void Unit::adjust_weights(double superior_layer_delta)
+void Unit::adjust_weights()
 {
-	
-	double deltah =  activation_func_derv(pre_output()) * superior_layer_delta ; // * get_output();
 	
 	for(int i = 0; i < input_count;i ++)
 	{
@@ -128,4 +133,21 @@ void Unit::divide(int len)
 {
 	for(int i=0;i<input_count;i++)
 		input_weights[i] /= len;
+}
+
+double Unit::get_delta(Unit *u)
+{
+
+	for (int i = 0;i<input_count;i++)
+		if (u == input_area[i])
+	      return deltah * old_weights[i];
+
+	assert(false);
+	return 0;
+}
+
+void Unit::fix_weights()
+{
+	for(int i = 0; i < input_count;i ++)
+		old_weights[i] = input_weights[i];
 }
