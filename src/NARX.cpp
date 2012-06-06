@@ -32,6 +32,7 @@ extern double **Nseries;
 extern int series_len;
 extern int epochs;
 extern double **exogenous_series;
+extern double **Nexogenous_series;
 extern int *used_exogenous;
 
 QString narx_log_str;
@@ -211,7 +212,7 @@ void NARX::trainEpoch(bool logging, int epo)
 	{
 		if(used_exogenous[i]) {
 			for(int j=0;j<a+1;j++) 
-				exogenous[j+i*a]->set_input(exogenous_series[i][series_index - j]);
+				exogenous[j+i*a]->set_input(Nexogenous_series[i][series_index - j]);
 			//_log(QString("ok %1").arg(exogenous_series[i][series_index]));
 			//FLOG(QString("ok exo=%1\n").arg(exogenous_series[i][series_index]).toStdString().c_str());
 		}
@@ -241,8 +242,8 @@ void NARX::trainEpoch(bool logging, int epo)
 		double delta =0;
 		for(int j=0;j<N;j++)
 			delta+= output_units[j]->get_delta(hunits[i]);
-
-		hunits[i]->adjust_weights(delta);
+		hunits[i]->compute_delta(delta);
+		hunits[i]->adjust_weights();
 	}
 	
 	}
@@ -288,14 +289,15 @@ void NARX::trainEpoch(bool logging, int epo)
 		/* if (exogenous) */
 		for (int i=0;i<M;i++)
 		{
-			for (int j = a; j >= 0 ; j++)
+			if(used_exogenous[i]) 
+			for (int j = a; j >= 0 ; j--)
 			{
 				if(t>=j)
-					exogenous[i*M + j]->set_input(exogenous_series[i][t-j]);
+					exogenous[i*a + j]->set_input(Nexogenous_series[i][t-j]);
 				else
-					exogenous[i*M + j]->set_input(0);
+					exogenous[i*a + j]->set_input(0);
 
-				fi[t]->X[i*M+j] = exogenous[i*M + j]->get_input();
+				fi[t]->X[i*a+j] = exogenous[i*a + j]->get_input();
 			}
 		}
 
@@ -305,11 +307,11 @@ if(targets)
 			for (int j = b; j > 0; j--)
 			{
 				if(t>=j)
-					inputs[i*N + j - 1]->set_input(Nseries[i][t-j]);
+					inputs[i*b + j - 1]->set_input(Nseries[i][t-j]);
 				else
-					inputs[i*N + j - 1]->set_input(0);
+					inputs[i*b + j - 1]->set_input(0);
 
-				fi[t]->D[i*N+j - 1] = inputs[i*N + j - 1]->get_input();
+				fi[t]->D[i*b+j - 1] = inputs[i*b + j - 1]->get_input();
 			}
 		}
 
@@ -322,13 +324,13 @@ if (feedback)
 				//FLOG(QString("testing%1\n").arg(fi[t]->Y[i*N+j]).toStdString().c_str());
 
 				if(t>=j)
-					feedbacks[i*N + j - 1]->set_input(Y[i][t-j]);
+					feedbacks[i*b + j - 1]->set_input(Y[i][t-j]);
 				else
-					feedbacks[i*N + j - 1]->set_input(0);
+					feedbacks[i*b + j - 1]->set_input(0);
 
 				//FLOG(QString("testing%1\n").arg(fi[t]->Y[i*N+j]).toStdString().c_str());
 
-				fi[t]->Y[i*N+j - 1] = feedbacks[i*N + j - 1]->get_input();
+				fi[t]->Y[i*b+j - 1] = feedbacks[i*b + j - 1]->get_input();
 			}
 		}
 
@@ -346,6 +348,15 @@ if (feedback)
 
 		}
 
+		double **previous_deltas = new double*[series_len];
+		for(int i=0;i<series_len;i++)
+		{
+			previous_deltas[i] = new double[N];
+			for(int j=0;j<N;j++)
+				previous_deltas[i][j] = 0;
+		}
+		
+
 		/* backpropagating the errors */
 		for (t=series_len-1;t>=0;t--)
 		{
@@ -354,9 +365,9 @@ if (feedback)
 			/* if (exogenous) */
 		for (int i=0;i<M;i++)
 		{
-			for (int j = a; j >= 0 ; j++)
+			for (int j = a; j >= 0 ; j--)
 			{
-					exogenous[i*M + j]->set_input(fi[t]->X[i*M+j]);
+					exogenous[i*a + j]->set_input(fi[t]->X[i*a+j]);
 			}
 		}
 
@@ -365,7 +376,7 @@ if(targets)
 		{
 			for (int j = b; j > 0; j--)
 			{
-					inputs[i*N + j - 1]->set_input(fi[t]->D[i*N+j - 1]);
+					inputs[i*b + j - 1]->set_input(fi[t]->D[i*b+j - 1]);
 			}
 		}
 
@@ -374,26 +385,50 @@ if (feedback)
 		{
 			for (int j = b; j > 0; j--)
 			{
-					feedbacks[i*N + j - 1]->set_input(fi[t]->Y[i*N+j - 1]);
+					feedbacks[i*b + j - 1]->set_input(fi[t]->Y[i*b+j - 1]);
 			}
 		}
 
-
+		
 			for(int i=0;i<N;i++) 
 			{
-				output_units[i]->setTarget(Nseries[i][t]);
 				output_units[i]->fix_weights();
-				output_units[i]->compute_delta();
+				output_units[i]->setTarget(Nseries[i][t]);
+				if(t==series_len - 1)
+				{
+					output_units[i]->compute_delta();
+				}
+				else
+				{
+					//double deltas = 0;
+					//for(int j=0;j<b;j++)
+					//	if(t+j<series_len)
+					//		deltas += previous_deltas[t+j][i];
+					//output_units[i]->compute_delta(deltas);
+					output_units[i]->compute_delta(output_units[i]->error() + previous_deltas[t][i]);
+				}
 				output_units[i]->adjust_weights();
 			}
+		
 
 			for(int i=0;i<H;i++) 
 			{
 				double delta = 0;
 				for(int j=0;j<N;j++)
 					delta+= output_units[j]->get_delta(hunits[i]);
+				hunits[i]->compute_delta(delta);
+				hunits[i]->fix_weights();
+				hunits[i]->adjust_weights();
+			}
 
-				hunits[i]->adjust_weights(delta);
+			for(int k=0;k<N;k++)
+			for(int i=0;i<b;i++)
+			{
+				double delta = 0;
+				for(int j=0;j<H;j++)
+					delta+= hunits[j]->get_delta(feedbacks[k*N + i]);
+				if(t-i-1>=0)
+					previous_deltas[t - i - 1][k] += delta;
 			}
 
 			if(t==series_len - 1)
@@ -411,8 +446,8 @@ if (feedback)
 		delete []Y;
 		for(int i=0;i<series_len;i++) delete fi[i];
 		delete []fi;
-
-
+		for(int i=0;i<series_len;i++) delete previous_deltas[i];
+		delete []previous_deltas;
 	}
 
 	if(logging)

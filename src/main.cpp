@@ -79,11 +79,16 @@ int series_func;
 int series_noise;
 double **series = 0;
 double **exogenous_series;
+double **Nexogenous_series;
 
 double **Nseries = 0;
 
 double *Nvariance ;
+double *N_exo_variance;
+
 double *N_E ;
+double *N_exo_E;
+
 extern int N;
 
 
@@ -91,20 +96,43 @@ int *used_exogenous;
 
 int epochs = 100;
 
-int M=0;
+int M = 0;
 
 void normalize_f()
 {
-	if(!normalize) {Nseries = series;return;}
+	if(!normalize) 
+	{
+		Nseries = series;
+		Nexogenous_series = exogenous_series;
+		return;
+	}
 
 	N_E =  new double[N];
 	Nvariance = new double[N];
+
+	N_exo_E =  new double[M];
+	N_exo_variance = new double[M];
 
 	for(int i=0;i<N;i++)
 	{
 		N_E[i] = 0;
 		Nvariance[i] = 1;
 	}
+
+	for(int i=0;i<M;i++)
+	{
+		N_exo_E[i] = 0;
+		N_exo_variance[i] = 1;
+	}
+
+
+	for(int j=0;j<M;j++)
+	{
+		for(int i=0;i<series_len;i++) N_exo_E[j]+=exogenous_series[j][i];
+	    N_exo_E[j]/=series_len;	
+	}
+
+
 	for(int j=0;j<N;j++)
 	{
 		for(int i=0;i<series_len;i++) N_E[j]+=series[j][i];
@@ -112,7 +140,18 @@ void normalize_f()
 
 		
 	}
+
+	for(int j=0;j<M;j++)
+		if(used_exogenous[j])
+	{
+		for(int i=0;i<series_len;i++) N_exo_variance[j]+=qPow(exogenous_series[j][i]-N_exo_E[j], 2);
+		N_exo_variance[j]/=series_len;
+
+		LOG(QString("Normalized exogenous series %1, E=%2, variance = %3").arg(j).arg(N_exo_E[j]).arg(N_exo_variance[j]));
+	}
+	
 	for(int j=0;j<N;j++)
+		
 	{
 		for(int i=0;i<series_len;i++) Nvariance[j]+=qPow(series[j][i]-N_E[j], 2);
 		Nvariance[j]/=series_len;
@@ -127,12 +166,26 @@ void normalize_f()
 		
 	}
 
+	Nexogenous_series = new double*[M];
+	for (int i=0;i<M;i++)
+	{
+		Nexogenous_series[i]=new double[series_len];
+		
+	}
+
 	
 
 	for(int j=0;j<N;j++)
 	
 		for(int i=0;i<series_len;i++) {
 			Nseries[j][i] = (series[j][i] - N_E[j])/Nvariance[j];
+			//FLOG(QString("norm series:%1\n").arg(Nseries[j][i]).toStdString().c_str());
+		}
+
+	for(int j=0;j<M;j++)
+	
+		for(int i=0;i<series_len;i++) {
+			Nexogenous_series[j][i] = (exogenous_series[j][i] - N_exo_E[j])/N_exo_variance[j];
 			//FLOG(QString("norm series:%1\n").arg(Nseries[j][i]).toStdString().c_str());
 		}
 }

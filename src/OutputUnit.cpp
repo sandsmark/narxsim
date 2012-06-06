@@ -23,9 +23,7 @@ OutputUnit::OutputUnit(void):Unit()
 {
 
 	target = 0;
-	old_weights = new double[MAX_INPUTS_PER_UNIT];
-	for(int i =0; i < MAX_INPUTS_PER_UNIT;i ++)
-		old_weights[i] = input_weights[i];
+
 }
 
 
@@ -56,6 +54,11 @@ void OutputUnit::adjust_weights()
 	
 }
 
+void OutputUnit::compute_delta(double superior_layer_delta)
+{
+	deltao = activation_func_derv(pre_output()) * superior_layer_delta;
+}
+
 void OutputUnit::compute_delta()
 {
 	deltao = activation_func_derv(pre_output()) * error();
@@ -70,10 +73,4 @@ double OutputUnit::get_delta(Unit *u)
 
 	assert(false);
 	return 0;
-}
-
-void OutputUnit::fix_weights()
-{
-	for(int i = 0; i < input_count;i ++)
-	old_weights[i] = input_weights[i];
 }

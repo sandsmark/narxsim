@@ -400,7 +400,7 @@ void NARX2::Button_45()
 			arch = NARX_D;
 		}
 		else if (!ui.check_del_targets->isChecked() && ui.check_del_outputs->isChecked() && ui.check_exogenous->isChecked()
-			&& ui.spinbox_xregressor->value()>0)
+			)
 		{
 			QMessageBox::information( this, "NARX", "Selected architecture: NARX-Y" );
 			LOG("Selected architecture: NARX-Y");
@@ -421,7 +421,7 @@ void NARX2::Button_45()
 			arch = NAR_Y;
 		}
 		else if (ui.check_del_targets->isChecked() && ui.check_del_outputs->isChecked() && !ui.check_exogenous->isChecked()
-			&& ui.spinbox_xregressor->value()>0)
+			&& 1)
 		{
 			QMessageBox::information( this, "NARX", "Selected architecture: NAR-DY" );
 			LOG("Selected architecture: NAR-DY");

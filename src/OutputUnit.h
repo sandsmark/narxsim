@@ -22,7 +22,7 @@ protected:
 
 	double target;
 
-	double *old_weights;
+
 	double deltao;
 
 public:
@@ -34,10 +34,9 @@ public:
 
 	virtual void adjust_weights();
 
-	void compute_delta();
+	virtual void compute_delta(double superior_layer_delta);
+	virtual void compute_delta();
 
-	void fix_weights();
-
-	double get_delta(Unit * u);
+	virtual double get_delta(Unit * u);
 };
 
