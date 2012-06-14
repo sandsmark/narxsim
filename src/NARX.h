@@ -66,6 +66,8 @@ public:
 
 	void train(int epochs);
 
+	void test(int epo);
+
 	ARCH getArch();
 
 	void copy(NARX *n);

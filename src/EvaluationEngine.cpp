@@ -39,6 +39,7 @@ void EvaluationEngine::insertvalue(double target, double pred)
 {
 	series[curlen]=target;
 	predicted[curlen]=pred;
+	FLOG(QString("series:%1,predicted:%2\n").arg(target).arg(pred).toStdString().c_str());
 	curlen++;
 }
 
@@ -49,7 +50,7 @@ double EvaluationEngine::F1()
 	for(int i=0;i<curlen;i++)
 	{
 		ret += qPow(series[i] - predicted[i], 2);
-		//FLOG(QString(":%1\n").arg(predicted[i]).toStdString().c_str());
+		//FLOG(QString(":%1,%2\n").arg(series[i]).arg(predicted[i]).toStdString().c_str());
 	}
 
 	return (ret);
@@ -69,7 +70,7 @@ double EvaluationEngine::F3()
          sum += qAbs(series[i]);
 	}
 
-	return F2() / sum / curlen;
+	return F2() / sum * curlen;
 }
 
 double EvaluationEngine::F4()
@@ -164,5 +165,6 @@ void EvaluationEngine::reset()
 {
 	//for( int i=0;i<series_len;i++)
 	//	series[i]=predicted[i]=0;
+	//FLOG(QString("curlen:%1\n").arg(curlen).toStdString().c_str());
 	curlen = 0;
 }

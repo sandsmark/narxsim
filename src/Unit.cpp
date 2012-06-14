@@ -17,6 +17,7 @@ permissions and limitations under the License.
 #include "narx_util.h"
 #include "stdlib.h"
 #include "assert.h"
+#include "Activation_functions.h"
 
 
 double Unit::alfa = 0.2;
@@ -74,9 +75,16 @@ double Unit::pre_output()
 {
 	double preoutput = 0;
 	for (int i=0; i < input_count; i++)
+	{
+		//FLOG(QString("input:%1\n").arg(input_area[i]->get_output()).toStdString().c_str());
 		preoutput += input_area[i]->get_output() * input_weights[i];
-	//FLOG(QString("testing%1\n").arg(preoutput).toStdString().c_str());
+	}
+	//if(activation_func == Activation_functions::aslog)
+	//FLOG(QString("unit preoutput:%1\n").arg(preoutput).toStdString().c_str());
+	// if (activation_func == Activation_functions::identity)
+	//	FLOG(QString("output unit preoutput:%1\n").arg(preoutput).toStdString().c_str());
 	preoutput += bias;
+	//FLOG(QString("output unit preoutput:%1\n").arg(preoutput).toStdString().c_str());
 	return preoutput;
 }
 
@@ -103,7 +111,7 @@ void Unit::adjust_weights()
 	for(int i = 0; i < input_count;i ++)
 	{
 		input_weights[i] += Unit::alfa * deltah * input_area[i]->get_output();
-		//FLOG(QString("ok adjust=%1\n").arg(Unit::alfa * deltah * input_area[i]->get_output()).toStdString().c_str());
+		//FLOG(QString("ok adjust=%1:%2\n").arg( pre_output()  ) .arg(activation_func_derv(pre_output())).toStdString().c_str());
 	}
 }
 

@@ -17,6 +17,7 @@ permissions and limitations under the License.
 #include "Unit.h"
 #include "assert.h"
 #include "narx_util.h"
+#include "Activation_functions.h"
 
 
 OutputUnit::OutputUnit(void):Unit()
@@ -49,7 +50,7 @@ void OutputUnit::adjust_weights()
 	for(int i = 0; i < input_count;i ++)
 	{
 		input_weights[i] += Unit::alfa * deltao * input_area[i]->get_output();
-		
+		//
 	}
 	
 }
@@ -74,3 +75,15 @@ double OutputUnit::get_delta(Unit *u)
 	assert(false);
 	return 0;
 }
+/*double OutputUnit::pre_output()
+{
+	double preoutput = 0;
+	for (int i=0; i < input_count; i++)
+		preoutput += input_area[i]->get_output() * input_weights[i];
+	//if(activation_func == Activation_functions::aslog)
+	//FLOG(QString("unit preoutput:%1\n").arg(preoutput).toStdString().c_str());
+	 if (activation_func == Activation_functions::identity)
+		FLOG(QString("output unit preoutput:%1\n").arg(preoutput).toStdString().c_str());
+	preoutput += bias;
+	return preoutput;
+}*/

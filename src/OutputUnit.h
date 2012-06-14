@@ -25,6 +25,8 @@ protected:
 
 	double deltao;
 
+	//virtual double pre_output();
+
 public:
 	OutputUnit(void);
 	~OutputUnit(void);
@@ -38,5 +40,7 @@ public:
 	virtual void compute_delta();
 
 	virtual double get_delta(Unit * u);
+
+
 };
 
