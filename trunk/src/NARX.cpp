@@ -29,7 +29,7 @@ permissions and limitations under the License.
 
 extern double **series;
 extern double **Nseries;
-extern int series_len;
+extern int series_len, train_len, test_len;
 extern int epochs;
 extern double **exogenous_series;
 extern double **Nexogenous_series;
@@ -58,8 +58,8 @@ NARX::NARX(ARCH arch, int H, int hact, int a, int b, int M, int N, int feedback,
 	rw = new EvaluationEngine*[N];
 	for(int i=0;i<N;i++) 
 	{
-		ee[i] = new EvaluationEngine(series_len);
-		rw[i] = new EvaluationEngine(series_len);
+		ee[i] = new EvaluationEngine(train_len);
+		rw[i] = new EvaluationEngine(train_len);
 	}
 
 	hunits = new Unit*[H];
@@ -195,14 +195,23 @@ void NARX::trainEpoch(bool logging, int epo)
 	
 	int feedback_index = 0;
 	
-	for(int series_index = a; series_index < series_len ; series_index ++)
+	for(int series_index = a; series_index < train_len ; series_index ++)
 	{
+
+	if(targets)
 
 	for(int j=0;j<N;j++)
 		for(int i=1;i<=b;i++) 
 		{
-		
-			inputs[j*series_len + i - 1]->set_input(Nseries[j][ series_index - i - a + b  ]);
+		    if (series_index - i >=0 )
+			{
+				inputs[j*b + i - 1]->set_input(Nseries[j][ series_index - i  ]);
+				//FLOG(QString("setting input:%1\n").arg(Nseries[j][ series_index - i  ]).toStdString().c_str());
+			}
+			else
+				inputs[j*b + i - 1]->set_input(0);
+
+
 		}
 	
 	
@@ -212,7 +221,10 @@ void NARX::trainEpoch(bool logging, int epo)
 	{
 		if(used_exogenous[i]) {
 			for(int j=0;j<a+1;j++) 
+				if(series_index - j>=0)
 				exogenous[j+i*a]->set_input(Nexogenous_series[i][series_index - j]);
+				else
+					exogenous[j+i*a]->set_input(0);
 			//_log(QString("ok %1").arg(exogenous_series[i][series_index]));
 			//FLOG(QString("ok exo=%1\n").arg(exogenous_series[i][series_index]).toStdString().c_str());
 		}
@@ -272,17 +284,17 @@ void NARX::trainEpoch(bool logging, int epo)
 
 		Y = new double*[N];
 		for(int i=0;i<N;i++)
-			Y[i] =  new double[series_len];
+			Y[i] =  new double[train_len];
 
 		FeedbackInfo **fi;
 
-		fi = new FeedbackInfo*[series_len];
-		for(int i=0;i<series_len;i++)
+		fi = new FeedbackInfo*[train_len];
+		for(int i=0;i<train_len;i++)
 			fi[i] = new FeedbackInfo(M*(a+1), N*b, N*b);
 
 		int t=0;
 
-		for(;t<series_len;t++)
+		for(;t<train_len;t++)
 		{
 
 			
@@ -348,8 +360,8 @@ if (feedback)
 
 		}
 
-		double **previous_deltas = new double*[series_len];
-		for(int i=0;i<series_len;i++)
+		double **previous_deltas = new double*[train_len];
+		for(int i=0;i<train_len;i++)
 		{
 			previous_deltas[i] = new double[N];
 			for(int j=0;j<N;j++)
@@ -358,7 +370,7 @@ if (feedback)
 		
 
 		/* backpropagating the errors */
-		for (t=series_len-1;t>=0;t--)
+		for (t=train_len-1;t>=0;t--)
 		{
 			this->copy(originalnarx);
 
@@ -394,7 +406,7 @@ if (feedback)
 			{
 				output_units[i]->fix_weights();
 				output_units[i]->setTarget(Nseries[i][t]);
-				if(t==series_len - 1)
+				if(t==train_len - 1)
 				{
 					output_units[i]->compute_delta();
 				}
@@ -402,7 +414,7 @@ if (feedback)
 				{
 					//double deltas = 0;
 					//for(int j=0;j<b;j++)
-					//	if(t+j<series_len)
+					//	if(t+j<train_len)
 					//		deltas += previous_deltas[t+j][i];
 					//output_units[i]->compute_delta(deltas);
 					output_units[i]->compute_delta(output_units[i]->error() + previous_deltas[t][i]);
@@ -431,22 +443,22 @@ if (feedback)
 					previous_deltas[t - i - 1][k] += delta;
 			}
 
-			if(t==series_len - 1)
+			if(t==train_len - 1)
 				copynarx->copy(this);
 			else
 				copynarx->sum(this);
 
 		}
 
-		copynarx->divide(series_len);
+		copynarx->divide(train_len);
 		this->copy(copynarx);
 		originalnarx->copy(this);
 		
 		for(int i=0;i<N;i++) delete Y[i];
 		delete []Y;
-		for(int i=0;i<series_len;i++) delete fi[i];
+		for(int i=0;i<train_len;i++) delete fi[i];
 		delete []fi;
-		for(int i=0;i<series_len;i++) delete previous_deltas[i];
+		for(int i=0;i<train_len;i++) delete previous_deltas[i];
 		delete []previous_deltas;
 	}
 
@@ -473,7 +485,7 @@ if (feedback)
 		.arg(rw[i]->KS1()).arg(rw[i]->KS2()).arg(rw[i]->KS12()).arg(rw[i]->DA());
 	_log(str);
 	}
-	
+	test(epo);
 }
 
 
@@ -553,4 +565,91 @@ void NARX::divide(int len)
 		hunits[i]->divide(len);
 	for(int i=0;i<N;i++)
 		output_units[i]->divide(len);
+}
+
+void NARX::test(int epo)
+{
+	for(int i=0;i<N;i++)
+	{
+		ee[i]->reset();
+		rw[i]->reset();
+	}
+
+	QString str;
+
+	Y = new double*[N];
+		for(int i=0;i<N;i++)
+			Y[i] =  new double[test_len];
+	
+	
+	for(int series_index = train_len; series_index < series_len ; series_index ++)
+	{
+
+	if(targets)
+	for(int j=0;j<N;j++)
+		for(int i=1;i<=b;i++) 
+		{
+		    if (series_index - i >=0)
+			inputs[j*b + i - 1]->set_input(Nseries[j][ series_index - i ]);
+			else
+				inputs[j*b + i - 1]->set_input(0);
+		}
+	
+	
+		//exogenous[0]->set_input(series[series_index]);
+
+	if(feedback)
+			for(int j=0;j<N;j++)
+			for(int i=0;i<b;i++)
+				if(series_index - train_len - j >=0)
+					feedbacks[j*b+i]->set_input(Y[j][series_index - train_len - j - 1]);
+				else
+					feedbacks[j*b+i]->set_input(0);
+
+	for(int i=0;i<M;i++)
+	{
+		if(used_exogenous[i]) {
+			for(int j=0;j<a+1;j++) 
+				if(series_index - j >=0)
+				exogenous[j+i*a]->set_input(Nexogenous_series[i][series_index - j]);
+				else
+					exogenous[j+i*a]->set_input(0);
+			//_log(QString("ok %1").arg(exogenous_series[i][series_index]));
+			//FLOG(QString("ok exo=%1\n").arg(exogenous_series[i][series_index]).toStdString().c_str());
+		}
+	}
+
+	for(int i=0;i<N;i++)
+	{
+		//output_units[i]->setTarget(Nseries[i][series_index]);
+
+		ee[i]->insertvalue(Nseries[i][series_index], output_units[i]->get_output());
+		rw[i]->insertvalue(Nseries[i][series_index], Nseries[i][series_index>0 ? series_index - 1 : 0]);
+		Y[i][series_index - train_len] = output_units[i]->get_output();
+	}
+	
+	//FLOG(QString("input target:index %1 : %2, output narx: %3\n").arg(series_index).arg(series[series_index]).arg(output_unit->get_output()).toStdString().c_str());
+	
+	
+	}
+
+	for(int i=0;i<N;i++)
+	{
+	str = QString("target %1:test %2: F1 = %3; F2 = %4; F3 = %5; F4 = %6; KS1= %7; KS2=%8; KS12=%9; DA = %10"
+		"; F1RW=%11; F2RW=%12; F3RW=%13; F4RW=%14; KS1=%15; KS2=%16; KS12=%17; DA=%18")
+		.arg(i)
+		.arg(epo)
+		.arg(ee[i]->F1()).arg(ee[i]->F2()).arg(ee[i]->F3()).arg(ee[i]->F4())
+		.arg(ee[i]->KS1())
+		.arg(ee[i]->KS2()).arg(ee[i]->KS12()).arg(ee[i]->DA())
+		.arg(rw[i]->F1()).arg(rw[i]->F2()).arg(rw[i]->F3()).arg(rw[i]->F4())
+		.arg(rw[i]->KS1()).arg(rw[i]->KS2()).arg(rw[i]->KS12()).arg(rw[i]->DA());
+	_log(str);
+	}
+
+	for(int i=0;i<N;i++) delete Y[i];
+		delete []Y;
+	
+	
+
 }

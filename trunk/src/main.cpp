@@ -75,6 +75,8 @@ int series_generated = 0;
 
 double series_start, series_end;
 int series_len;
+int test_len;
+int train_len;
 int series_func;
 int series_noise;
 double **series = 0;
@@ -147,7 +149,7 @@ void normalize_f()
 		for(int i=0;i<series_len;i++) N_exo_variance[j]+=qPow(exogenous_series[j][i]-N_exo_E[j], 2);
 		N_exo_variance[j]/=series_len;
 
-		LOG(QString("Normalized exogenous series %1, E=%2, variance = %3").arg(j).arg(N_exo_E[j]).arg(N_exo_variance[j]));
+		//LOG(QString("Normalized exogenous series %1, E=%2, variance = %3").arg(j).arg(N_exo_E[j]).arg(N_exo_variance[j]));
 	}
 	
 	for(int j=0;j<N;j++)

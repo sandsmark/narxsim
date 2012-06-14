@@ -27,6 +27,7 @@ permissions and limitations under the License.
 
 extern double series_start, series_end;
 extern int series_len;
+extern int train_len, test_len;
 extern int series_func;
 extern int series_noise;
 extern int series_generated;
@@ -66,7 +67,7 @@ NARX2::NARX2(QWidget *parent, Qt::WFlags flags)
 	ui.combo_hunits_act->addItem("sigmoid");
 	ui.combo_hunits_act->addItem("Beta=0.1 Bsigmoid");
 	ui.combo_hunits_act->addItem("antisymmetric log");
-	ui.combo_hunits_act->setCurrentIndex(2);
+	//ui.combo_hunits_act->setCurrentIndex(2);
 
 	ui.combo_ounits_act->addItem("linear");
 
@@ -142,6 +143,8 @@ void NARX2::Button_12()
 	double step = ( series_end - series_start ) / series_len;
 
 	double cur = series_start;
+	double prev_cury = series_start;
+	double prev2_cury = series_start;
 	/* hardcoded values for Y and Z variables STARTS HERE  */
 	double cury = 3.0; 
 	double curz = 1.1;
@@ -174,6 +177,24 @@ void NARX2::Button_12()
 		
 
 		M=3;
+		
+		//goto pre_exit;
+	}
+	else if(ui.predefined2->isChecked())
+	{
+		ui.table_series->insertColumn(1);
+		QTableWidgetItem * col1= new QTableWidgetItem();
+		col1->setText("Y (input value - exogenous)");
+		ui.table_series->setHorizontalHeaderItem(1, col1);
+		QTableWidgetItem * exo1= new QTableWidgetItem();
+		ui.table_series->setItem(0, 1, exo1);
+		exo1->setText("Use in NARX");
+		exo1->setCheckState(Qt::Checked);
+
+		
+		
+
+		M=2;
 		
 		//goto pre_exit;
 	}
@@ -248,6 +269,20 @@ void NARX2::Button_12()
 		exogenous_series[1][i - 1] = cury;
 		exogenous_series[2][i - 1] = curz;
 		M=3;
+	
+		
+	}
+	else if(ui.predefined2->isChecked())
+	{
+		if(i>=2)
+		val = qSin(cur - prev2_cury)* qLn(prev_cury + 1) +  qLn(qAbs(series[0][i - 2]) + 1) - cury*qSin(cur - prev_cury) ;
+		
+		else 
+			val = qSin(cur - prev2_cury)* qLn(prev_cury +  1) - cury*qSin(cur - prev_cury) ;
+
+		exogenous_series[1][i - 1] = cury;
+		//exogenous_series[2][i - 1] = curz;
+		M=2;
 	}
 
 		if(series_noise)
@@ -266,13 +301,28 @@ void NARX2::Button_12()
 
 			ui. table_series->setItem(i, 3, newItem2);
 		}
+		else if(ui.predefined2->isChecked())
+		{
+			QTableWidgetItem *newItemY = new QTableWidgetItem(tr("%1").arg(cury));
+			ui. table_series->setItem(i, 1, newItemY);
+			
+
+			ui. table_series->setItem(i, 2, newItem2);
+		}
 		else
 			ui. table_series->setItem(i, 1, newItem2);
 
 		series [0][i - 1] = val;
+		prev2_cury = prev_cury;
+		prev_cury = cury;
 		cur+=step;
 
 		if(ui.predefined1->isChecked())
+		{
+			cury+=stepy;
+			curz+=stepz;
+		}
+		if(ui.predefined2->isChecked())
 		{
 			cury+=stepy;
 			curz+=stepz;
@@ -322,6 +372,9 @@ void NARX2::Button_23()
 	}
 	narx_stage1_1 = 1;
 	}
+	ui.spinbox_test_percentage->setEnabled(false);
+	test_len = series_len * ui.spinbox_test_percentage->value() / 100;
+	train_len = series_len - test_len;
 }
 
 void NARX2::Button_32()
@@ -393,7 +446,7 @@ void NARX2::Button_45()
 			arch = TDNN_X;
 		}
 		else if (ui.check_del_targets->isChecked() && !ui.check_del_outputs->isChecked() && ui.check_exogenous->isChecked()
-			&& ui.spinbox_xregressor->value()>0)
+			&& 1)
 		{
 			QMessageBox::information( this, "NARX", "Selected architecture: NARX-D" );
 			LOG("Selected architecture: NARX-D");
@@ -407,7 +460,7 @@ void NARX2::Button_45()
 			arch = NARX_Y;
 		}
 		else if (ui.check_del_targets->isChecked() && ui.check_del_outputs->isChecked() && ui.check_exogenous->isChecked()
-			&& ui.spinbox_xregressor->value()>0)
+			&& 1)
 		{
 			QMessageBox::information( this, "NARX", "Selected architecture: NARX-DY" );
 			LOG("Selected architecture: NARX-DY");
