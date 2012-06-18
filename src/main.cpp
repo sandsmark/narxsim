@@ -130,15 +130,15 @@ void normalize_f()
 
 	for(int j=0;j<M;j++)
 	{
-		for(int i=0;i<series_len;i++) N_exo_E[j]+=exogenous_series[j][i];
-	    N_exo_E[j]/=series_len;	
+		for(int i=0;i<train_len;i++) N_exo_E[j]+=exogenous_series[j][i];
+	    N_exo_E[j]/=train_len;	
 	}
 
 
 	for(int j=0;j<N;j++)
 	{
-		for(int i=0;i<series_len;i++) N_E[j]+=series[j][i];
-	    N_E[j]/=series_len;
+		for(int i=0;i<train_len;i++) N_E[j]+=series[j][i];
+	    N_E[j]/=train_len;
 
 		
 	}
@@ -146,17 +146,17 @@ void normalize_f()
 	for(int j=0;j<M;j++)
 		if(used_exogenous[j])
 	{
-		for(int i=0;i<series_len;i++) N_exo_variance[j]+=qPow(exogenous_series[j][i]-N_exo_E[j], 2);
-		N_exo_variance[j]/=series_len;
+		for(int i=0;i<train_len;i++) N_exo_variance[j]+=qPow(exogenous_series[j][i]-N_exo_E[j], 2);
+		N_exo_variance[j]/=train_len;
 
-		//LOG(QString("Normalized exogenous series %1, E=%2, variance = %3").arg(j).arg(N_exo_E[j]).arg(N_exo_variance[j]));
+		LOG(QString("Normalized exogenous series %1, E=%2, variance = %3").arg(j).arg(N_exo_E[j]).arg(N_exo_variance[j]));
 	}
 	
 	for(int j=0;j<N;j++)
 		
 	{
-		for(int i=0;i<series_len;i++) Nvariance[j]+=qPow(series[j][i]-N_E[j], 2);
-		Nvariance[j]/=series_len;
+		for(int i=0;i<train_len;i++) Nvariance[j]+=qPow(series[j][i]-N_E[j], 2);
+		Nvariance[j]/=train_len;
 
 		LOG(QString("Normalized target series %1, E=%2, variance = %3").arg(j).arg(N_E[j]).arg(Nvariance[j]));
 	}
