@@ -3,3 +3,4 @@ How to compile:
 I didn't have time to make a makefile or something.
 I just use visual studio 2010 and compiled my own Qt from sources. Then I use the Qt designer to edit the form ( ui file ) and made a new Qt project in visual studio.
 Maybe in the future I will do some tool but for now this is the only way I know about how to build the project.
+More instructions: to compile from VS2010 you need the Qt VS2010 add-on, it's on their website. My version of Qt is 4.8.0
