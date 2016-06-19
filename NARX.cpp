@@ -581,23 +581,27 @@ void NARX::test(int epo)
 
         //exogenous[0]->set_input(series[series_index]);
 
-        if(feedback)
-            for(int j = 0; j < N; j++)
-                for(int i = 0; i < b; i++)
+        if(feedback) {
+            for(int j = 0; j < N; j++) {
+                for(int i = 0; i < b; i++) {
                     if(series_index - train_len - j >= 0) {
                         feedbacks[j * b + i]->set_input(Y[j][series_index - train_len - j - 1]);
                     } else {
                         feedbacks[j * b + i]->set_input(0);
                     }
+                }
+            }
+        }
 
         for(int i = 0; i < M; i++) {
             if(used_exogenous[i]) {
-                for(int j = 0; j < a + 1; j++)
+                for(int j = 0; j < a + 1; j++) {
                     if(series_index - j >= 0) {
                         exogenous[j + i * a]->set_input(Nexogenous_series[i][series_index - j]);
                     } else {
                         exogenous[j + i * a]->set_input(0);
                     }
+                }
 
                 //_log(QString("ok %1").arg(exogenous_series[i][series_index]));
                 //FLOG(QString("ok exo=%1\n").arg(exogenous_series[i][series_index]).toStdString().c_str());
