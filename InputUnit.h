@@ -18,15 +18,15 @@ permissions and limitations under the License.
 class InputUnit : public Unit
 {
 private:
-	double input_value;
+    double input_value;
 public:
-	InputUnit(double input);
-	InputUnit();
+    InputUnit(double input);
+    InputUnit();
     virtual ~InputUnit(void);
 
-	virtual double get_output();
-	void set_input(double arg);
-	double get_input();
+    virtual double get_output();
+    void set_input(double arg);
+    double get_input();
 
 };
 

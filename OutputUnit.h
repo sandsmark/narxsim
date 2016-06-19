@@ -16,30 +16,30 @@ permissions and limitations under the License.
 #pragma once
 #include "Unit.h"
 class OutputUnit :
-	public Unit
+    public Unit
 {
 protected:
 
-	double target;
+    double target;
 
 
-	double deltao;
+    double deltao;
 
-	//virtual double pre_output();
+    //virtual double pre_output();
 
 public:
-	OutputUnit(void);
+    OutputUnit(void);
     virtual ~OutputUnit(void);
 
-	void setTarget(double target);
-	double error();
+    void setTarget(double target);
+    double error();
 
-	virtual void adjust_weights();
+    virtual void adjust_weights();
 
-	virtual void compute_delta(double superior_layer_delta);
-	virtual void compute_delta();
+    virtual void compute_delta(double superior_layer_delta);
+    virtual void compute_delta();
 
-	virtual double get_delta(Unit * u);
+    virtual double get_delta(Unit * u);
 
 
 };

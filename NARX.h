@@ -23,59 +23,59 @@ permissions and limitations under the License.
 
 class NARX : public QThread
 {
-	Q_OBJECT
+    Q_OBJECT
 
 protected:
-	
-	int H;
-	int a;
-	int b;
-	int M;
-	int N;
 
-	int feedback, targets;
+    int H;
+    int a;
+    int b;
+    int M;
+    int N;
 
-	ARCH arch;
+    int feedback, targets;
+
+    ARCH arch;
 
 
-	int hact;
+    int hact;
 
-	Unit **hunits;
-	OutputUnit **output_units;
-	InputUnit **inputs;
+    Unit **hunits;
+    OutputUnit **output_units;
+    InputUnit **inputs;
 
-	InputUnit **feedbacks;
+    InputUnit **feedbacks;
 
-	InputUnit **exogenous;
+    InputUnit **exogenous;
 
-	double **Y;
+    double **Y;
 
-	EvaluationEngine **ee;
-	EvaluationEngine **rw;
+    EvaluationEngine **ee;
+    EvaluationEngine **rw;
 
-	void trainEpoch(bool logging, int epo);
-	void _log(QString str);
+    void trainEpoch(bool logging, int epo);
+    void _log(QString str);
 
-	void push_weights();
+    void push_weights();
 
-	void run();
+    void run();
 
 public:
-	NARX(ARCH arch, int H = 1, int hact = 2, int a = 0, int b = 0, int M = 0, int N = 1, int feedback = 0, int targets = 0);
-	~NARX(void);
+    NARX(ARCH arch, int H = 1, int hact = 2, int a = 0, int b = 0, int M = 0, int N = 1, int feedback = 0, int targets = 0);
+    ~NARX(void);
 
-	void train(int epochs);
+    void train(int epochs);
 
-	void test(int epo);
+    void test(int epo);
 
-	ARCH getArch();
+    ARCH getArch();
 
-	void copy(NARX *n);
-	void sum(NARX *n);
-	void divide(int len);
+    void copy(NARX *n);
+    void sum(NARX *n);
+    void divide(int len);
 
 signals:
-	void training_epoch_finished();
-	void log();
+    void training_epoch_finished();
+    void log();
 };
 

@@ -17,14 +17,14 @@ permissions and limitations under the License.
 class FeedbackInfo
 {
 public:
-	double *Y;
-	double *X;
-	double *D;
+    double *Y;
+    double *X;
+    double *D;
 
-	int x, y, d;
+    int x, y, d;
 
 public:
-	FeedbackInfo(int x, int y, int d);
-	~FeedbackInfo(void);
+    FeedbackInfo(int x, int y, int d);
+    ~FeedbackInfo(void);
 };
 
