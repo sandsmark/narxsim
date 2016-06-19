@@ -43,7 +43,7 @@ public:
 
 public:
 	Unit();
-	~Unit();
+    virtual ~Unit();
 
 	void set_activation_func ( double (*f) (double arg));
 	void set_activation_func_derv ( double (*f) (double arg));

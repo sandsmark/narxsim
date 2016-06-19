@@ -29,7 +29,7 @@ protected:
 
 public:
 	OutputUnit(void);
-	~OutputUnit(void);
+    virtual ~OutputUnit(void);
 
 	void setTarget(double target);
 	double error();

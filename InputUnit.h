@@ -22,7 +22,7 @@ private:
 public:
 	InputUnit(double input);
 	InputUnit();
-	~InputUnit(void);
+    virtual ~InputUnit(void);
 
 	virtual double get_output();
 	void set_input(double arg);
