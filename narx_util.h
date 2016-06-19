@@ -16,7 +16,7 @@ permissions and limitations under the License.
 #pragma once
 #define MAX_INPUTS_PER_UNIT 100
 #define MAX_SERIES_LEN 50000
-#include <QtGui/QApplication>
+#include <QApplication>
 
 void LOG(QString);
 void FLOG(const char *);
