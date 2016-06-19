@@ -1,2 +1,0 @@
-svn checkout svn://svn.code.sf.net/p/narxsim/code/trunk narxsim-code
-#is the SVN repository for the project. Maybe in the future some updates will be commited there.
