@@ -16,7 +16,7 @@ permissions and limitations under the License.
 #ifndef NARX2_H
 #define NARX2_H
 
-#include <QtGui/QMainWindow>
+#include <QMainWindow>
 #include "ui_narx2.h"
 
 class NARX2 : public QMainWindow
@@ -24,7 +24,7 @@ class NARX2 : public QMainWindow
 	Q_OBJECT
 
 public:
-	NARX2(QWidget *parent = 0, Qt::WFlags flags = 0);
+    NARX2(QWidget *parent = 0);
 	~NARX2();
 
 public slots:

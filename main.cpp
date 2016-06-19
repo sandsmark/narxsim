@@ -14,11 +14,9 @@ permissions and limitations under the License.
 */
 
 #include <stdio.h>
-#include <tchar.h>
-#include <SDKDDKVer.h>
 #include "narx2.h"
-#include <QtGui/QApplication>
-#include <QtGui/QMessageBox>
+#include <QApplication>
+#include <QMessageBox>
 
 #include "Unit.h"
 #include "Activation_functions.h"
@@ -28,8 +26,6 @@ permissions and limitations under the License.
 #include "time.h"
 #include "NARX.h"
 #include "qmath.h"
-
-//#include <QtGui/QApplication>
 
 NARX2 *w;
 FILE *outfile = 0;

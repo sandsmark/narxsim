@@ -19,8 +19,8 @@ permissions and limitations under the License.
 #include "InputUnit.h"
 #include "OutputUnit.h"
 #include "NARX.h"
-#include <QtGui/QMessageBox>
-#include <QtCore/qmath.h>
+#include <QMessageBox>
+#include <qmath.h>
 #include <QFileDialog>
 #include <QInputDialog>
 #include "narx_util.h"
@@ -52,8 +52,8 @@ int narx_stage1_1 = 0;
 //initialize NARX:
 ARCH arch = MLP;
 
-NARX2::NARX2(QWidget *parent, Qt::WFlags flags)
-	: QMainWindow(parent, flags)
+NARX2::NARX2(QWidget *parent)
+    : QMainWindow(parent)
 {
 	ui.setupUi(this);
 	
@@ -125,7 +125,14 @@ void NARX2::Button_12()
 	ui.Frame_generate->setEnabled(false);
 	ui.frame_1post->setHidden(false);
 
-	if(series_generated) goto exit1;
+    if(series_generated) {
+        //if(series_generated)
+        ui.tabWidget->setCurrentIndex(1);
+        ui.tabWidget->setTabEnabled(1, true);
+        ui.checkBox_normalize->setEnabled(false);
+        series_generated = 1;
+        //ui.tabWidget->setTabEnabled(0, false);
+    }
 
 	N = 1;
 
@@ -329,7 +336,6 @@ void NARX2::Button_12()
 		}
 	}
 	//ui.table_series->removeRow(i);
-pre_exit:
 
 	QMessageBox::information( this, "Proceed", "The series has been generated." );
 	LOG("The series has been generated.");
@@ -337,16 +343,12 @@ pre_exit:
 	normalize = ui.checkBox_normalize->isChecked();
 
 	
-exit1:
 	//if(series_generated)
 	ui.tabWidget->setCurrentIndex(1);
     ui.tabWidget->setTabEnabled(1, true);
 	ui.checkBox_normalize->setEnabled(false);
 	series_generated = 1;
     //ui.tabWidget->setTabEnabled(0, false);
-
-	
-
 }
 
 void NARX2::Button_21() 
