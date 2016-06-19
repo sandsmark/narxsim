@@ -28,8 +28,8 @@ public:
 	~NARX2();
 
 public slots:
-	void RadioButton_generate_series();
-	void RadioButton_load_series();
+//	void RadioButton_generate_series();
+//	void RadioButton_load_series();
 	void Button_12();
 	void Button_21();
 	void Button_23();

@@ -103,27 +103,25 @@ void NARX2::Button_start_train()
 	ui.Button_start_training->setEnabled(false);
 }
 
-void NARX2::RadioButton_generate_series() 
-{
-//QMessageBox::information( this, "Information", "Just clicked Ui PushButton" ); // #include <QtGui/QMessageBox>
-ui.Frame_generate->setHidden(false);
-ui.frame_load->setHidden(true);
-}
+//void NARX2::RadioButton_generate_series()
+//{
+////QMessageBox::information( this, "Information", "Just clicked Ui PushButton" ); // #include <QtGui/QMessageBox>
+//ui.Frame_generate->setHidden(false);
+//ui.frame_load->setHidden(true);
+//}
 
-void NARX2::RadioButton_load_series() 
-{
-//QMessageBox::information( this, "Information", "Just clicked LOAD" ); // #include <QtGui/QMessageBox>
-ui.Frame_generate->setHidden(true);
-ui.frame_load->setHidden(false);
-}
+//void NARX2::RadioButton_load_series()
+//{
+////QMessageBox::information( this, "Information", "Just clicked LOAD" ); // #include <QtGui/QMessageBox>
+//ui.Frame_generate->setHidden(true);
+//ui.frame_load->setHidden(false);
+//}
 
 void NARX2::Button_12() 
 {
-	
-
-	ui.frame1->setEnabled(false);
-	ui.Frame_generate->setEnabled(false);
-	ui.frame_1post->setHidden(false);
+    ui.tab->setEnabled(false);
+//	ui.Frame_generate->setEnabled(false);
+    ui.tab_2->setHidden(false);
 
     if(series_generated) {
         //if(series_generated)
@@ -548,6 +546,7 @@ void NARX2::Button_56()
 	{
 		
 
+        qWarning() << i;
 	QLabel *label_exo = new QLabel(ui.scrollAreaWidgetContents);
         label_exo->setObjectName(QString("label_exio%1").arg(i+1));
         label_exo->setGeometry(QRect(10, 10+30*(i+0), 21, 16));

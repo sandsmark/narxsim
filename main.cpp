@@ -205,13 +205,12 @@ int main(int argc, char *argv[])
 	
 	/* QtCore.QObject.connect(self.radioButton1,QtCore.SIGNAL("toggled(bool)"),self.radio_activateInput) */
 	w.ui.tabWidget->setCurrentIndex(0);
-	w.ui.frame_1post->setHidden(true);
-	w.ui.frame_load->setHidden(true);
+    w.ui.tabWidget_2->setCurrentIndex(0);
 	//w.ui.RadioButton_generate_series->connect(w.ui, QtCore::SIGNAL("toggled(bool)"),
 	QObject::connect ( w.ui.actionAbout, SIGNAL( triggered() ), &w, SLOT( Menu_about() ) );
 
-	QObject::connect ( w.ui.RadioButton_generate_series, SIGNAL( clicked() ), &w, SLOT( RadioButton_generate_series() ) );
-	QObject::connect ( w.ui.RadioButton_load_series, SIGNAL( clicked() ), &w, SLOT( RadioButton_load_series() ) );
+//	QObject::connect ( w.ui.RadioButton_generate_series, SIGNAL( clicked() ), &w, SLOT( RadioButton_generate_series() ) );
+//	QObject::connect ( w.ui.RadioButton_load_series, SIGNAL( clicked() ), &w, SLOT( RadioButton_load_series() ) );
 	QObject::connect ( w.ui.Button_tab12, SIGNAL( clicked() ), &w, SLOT( Button_12() ) );
 	QObject::connect ( w.ui.Button_tab21, SIGNAL( clicked() ), &w, SLOT( Button_21() ) );
 	QObject::connect ( w.ui.Button_tab23, SIGNAL( clicked() ), &w, SLOT( Button_23() ) );
